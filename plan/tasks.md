@@ -56,7 +56,7 @@
 
 ### T-05 — TicketPriority enum
 
-- Status: [ ] todo
+- Status: [x] done
 - Spec refs: `spec/requirements.md` FR-01 (priority); `spec/data-model.md`
 - Depends on: T-01
 - Scope: `TicketPriority` enum (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`). Small unit test for values. **Not yet:** validation annotations on DTOs.
