@@ -6,6 +6,6 @@ Short index for agents: **module → purpose → key files**. Update this when s
 |--------|---------|-----------|
 | `backend/` | Spring Boot API and domain (placeholder layout) | `backend/` (app code TBD) |
 | `frontend/` | Web UI (placeholder layout) | `frontend/` (app code TBD) |
-| `spec/` | Requirements, API contract, architecture specs | `spec/` |
+| `spec/` | Requirements and design specs | `spec/requirements.md`, `spec/architecture.md`, `spec/data-model.md`, `spec/state-machine.md` |
 | `docs/` | Project docs, prompt history, token/context notes | `docs/prompt-history.md`, `docs/token-optimisation.md`, this file |
 | `.cursor/` | Cursor rules, commands, skills | `.cursor/rules/`, `.cursor/commands/`, `.cursor/skills/` |

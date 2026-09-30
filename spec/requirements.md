@@ -1,6 +1,6 @@
 # Support Ticket Management System — Requirements
 
-**Document status:** Baselined (v0.4.0). Frozen until implementation feedback requires changes.
+**Document status:** Requirements baselined (v0.4.2); design specs are Draft. Frozen until implementation feedback requires changes.
 
 ## 1. Purpose & Scope
 
@@ -19,7 +19,7 @@ Define functional and non-functional requirements for a **Support Ticket Managem
 - Persistent storage in PostgreSQL.
 - Web UI for ticket workflows (FR-12).
 
-**Related specs (pending):** `architecture.md`, `data-model.md`, `api-contract.md`, `state-machine.md`, `ui-flow.md`, `test-strategy.md`.
+**Related specs:** `architecture.md`, `data-model.md`, `state-machine.md` (Draft); **pending:** `api-contract.md`, `ui-flow.md`, `test-strategy.md`.
 
 ### Out of Scope
 
@@ -44,7 +44,7 @@ Define functional and non-functional requirements for a **Support Ticket Managem
 | **Status transition** | An explicit operation that changes `status` according to the state machine. |
 | **General field update** | An operation that updates title, description, priority, and/or assignee but not status. |
 | **Optimistic locking** | Concurrency control using a version (or equivalent); updates based on stale version are rejected. |
-| **Keyword search** | Case-insensitive **substring** match of a search term against ticket **title** and **description**. |
+| **Keyword search** | Case-insensitive **substring** match of a search term against ticket **title** and **description**; match is **literal** (`%` and `_` escaped, not SQL wildcards). |
 
 ---
 
@@ -57,14 +57,14 @@ Each requirement includes acceptance criteria in **Given / When / Then** form. N
 | Field | Rules |
 |-------|--------|
 | `id` | Numeric, system-generated, stable identifier. Path id errors: **Common request rules**. |
-| `title` | Required; 3–200 characters. |
-| `description` | Required; max 5000 characters. |
+| `title` | Required; 3–200 characters; blank or whitespace-only rejected. |
+| `description` | Required; 1–5000 characters (non-blank); blank or whitespace-only rejected. |
 | `priority` | `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`; default `MEDIUM` on create. |
 | `status` | Always `OPEN` on creation; must not be settable on create. |
 | `assignee` | Optional; free text up to 100 characters (no email format validation). Empty string on create or PATCH is stored as null. |
 | `createdAt` | Set by system on create. |
 | `updatedAt` | Set by system on create and on successful updates. |
-| `version` | Integer; **0 on create**; exposed on ticket responses; required in PATCH and status transition requests; incremented on successful PATCH or transition (see FR-11). |
+| `version` | Non-negative integer, persisted as **BIGINT**; **0 on create**; exposed on ticket responses; required in PATCH and status transition requests; incremented on successful PATCH or transition (see FR-11). |
 
 ### Comment data model (reference)
 
@@ -98,8 +98,8 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 | FR-01-AC1 | Valid title (3–200 chars) and description (≤5000) | Client creates a ticket | Ticket persisted with `status` = `OPEN`, `version` = **0**, default `priority` = `MEDIUM` if omitted; response body is the **full ticket** including `id`, `status`, `version`, `createdAt`, `updatedAt` |
 | FR-01-AC2 | Valid payload with optional `priority` and assignee | Client creates a ticket | Stored values match input; omitted assignee → null; `assignee` `""` → null (FR-01-AC3) |
 | FR-01-AC3 | Valid create payload with `assignee` empty string | Client creates a ticket | Assignee stored as null |
-| FR-01-AC4 | Title missing, too short (<3), or too long (>200) | Client creates a ticket | CRR-04 |
-| FR-01-AC5 | Description missing or length >5000 | Client creates a ticket | CRR-04 |
+| FR-01-AC4 | Title missing, blank, whitespace-only, too short (<3), or too long (>200) | Client creates a ticket | CRR-04 |
+| FR-01-AC5 | Description missing, blank, whitespace-only, or length >5000 | Client creates a ticket | CRR-04 |
 | FR-01-AC6 | Invalid `priority` value | Client creates a ticket | CRR-04 |
 | FR-01-AC7 | Assignee length >100 | Client creates a ticket | CRR-04 |
 
@@ -152,7 +152,7 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 
 | ID | Given | When | Then |
 |----|-------|------|------|
-| FR-05-AC1 | Ticket exists (any status) | Client adds comment with valid author and body (no ticket `version` required) | Comment persisted with `createdAt`; visible on ticket detail |
+| FR-05-AC1 | Ticket exists (any status) | Client adds comment with valid author and body (no ticket `version` required) | Comment persisted with `createdAt`; visible on ticket detail; ticket `version` and `updatedAt` unchanged |
 | FR-05-AC2 | Author missing or length >100 | Client adds comment | CRR-04 |
 | FR-05-AC3 | Body missing, empty, or length >2000 | Client adds comment | CRR-04 |
 
@@ -170,6 +170,7 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 | FR-06-AC4 | Search combined with status filter (FR-07) | Client searches with both parameters | Only tickets matching keyword **and** status |
 | FR-06-AC5 | Keyword query parameter omitted, blank, or whitespace-only | Client lists or searches | No keyword filter applied; normal paginated list (FR-08) |
 | FR-06-AC6 | Keyword with leading/trailing whitespace | Client searches | Keyword trimmed before case-insensitive substring match on title and description |
+| FR-06-AC7 | Keyword contains `%` or `_` | Client searches | Characters matched literally (escaped in persistence query; not treated as SQL `LIKE` wildcards) |
 
 ---
 
@@ -200,7 +201,7 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 
 ### FR-09 — Status transition
 
-**Description:** Status changes only via a dedicated transition operation with current ticket `version`; backend enforces the state machine (Section 4). Path and body errors: **Common request rules**.
+**Description:** Status changes only via a dedicated transition operation with current ticket `version`; backend enforces the state machine in [`spec/state-machine.md`](state-machine.md). Path and body errors: **Common request rules**.
 
 | ID | Given | When | Then |
 |----|-------|------|------|
@@ -210,9 +211,10 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 | FR-09-AC4 | Ticket in `OPEN` at version *V* | Client transitions to `CANCELLED` with `version` *V* | Status becomes `CANCELLED`; `updatedAt` updated; `version` incremented |
 | FR-09-AC5 | Ticket in `IN_PROGRESS` at version *V* | Client transitions to `CANCELLED` with `version` *V* | Status becomes `CANCELLED`; `updatedAt` updated; `version` incremented |
 | FR-09-AC6 | Current status equals requested target (e.g. `OPEN` → `OPEN`) | Client requests transition with current `version` | HTTP 409; invalid transition `type` (decision 11); status unchanged |
-| FR-09-AC7 | Disallowed transition (see Section 4) | Client requests transition with current `version` | HTTP 409; invalid transition `type`; status unchanged |
+| FR-09-AC7 | Disallowed transition (see [`spec/state-machine.md`](state-machine.md)) | Client requests transition with current `version` | HTTP 409; invalid transition `type`; status unchanged |
 | FR-09-AC8 | Transition request omits `version` | Client requests transition | HTTP 400 (decision 11) |
 | FR-09-AC9 | Transition submitted with stale `version` | Client requests transition | HTTP 409; stale version `type`; status unchanged |
+| FR-09-AC10 | Transition body includes unknown or invalid target `status` value | Client requests transition | HTTP 400 with RFC 7807 field-level errors (CRR-04) |
 
 ---
 
@@ -265,52 +267,9 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 
 ## 4. State Machine Requirement
 
-Summary of ticket lifecycle rules (full detail will move to `state-machine.md`; see **Deferred to state-machine.md** below).
+Ticket status changes only through the dedicated transition operation (FR-09). The backend enforces a fixed lifecycle: five statuses (`OPEN`, `IN_PROGRESS`, `RESOLVED`, `CLOSED`, `CANCELLED`), five allowed transitions, twenty rejected transition pairs (including same-status), optimistic locking on each transition, and HTTP **409** for invalid transitions (decision 11).
 
-Status values: `OPEN`, `IN_PROGRESS`, `RESOLVED`, `CLOSED`, `CANCELLED`.
-
-### Allowed transitions
-
-| From \\ To | IN_PROGRESS | RESOLVED | CLOSED | CANCELLED |
-|------------|-------------|----------|--------|-----------|
-| **OPEN** | Yes | No | No | Yes |
-| **IN_PROGRESS** | No | Yes | No | Yes |
-| **RESOLVED** | No | No | Yes | No |
-| **CLOSED** | No | No | No | No |
-| **CANCELLED** | No | No | No | No |
-
-Linear happy path: `OPEN` → `IN_PROGRESS` → `RESOLVED` → `CLOSED`.
-
-Cancellation path: `OPEN` → `CANCELLED`; `IN_PROGRESS` → `CANCELLED`.
-
-### Mermaid view
-
-```mermaid
-stateDiagram-v2
-    [*] --> OPEN: create ticket
-    OPEN --> IN_PROGRESS
-    OPEN --> CANCELLED
-    IN_PROGRESS --> RESOLVED
-    IN_PROGRESS --> CANCELLED
-    RESOLVED --> CLOSED
-    CLOSED --> [*]
-    CANCELLED --> [*]
-```
-
-### Explicitly rejected transition examples
-
-| Current status | Requested status | Result |
-|----------------|------------------|--------|
-| `CLOSED` | `OPEN` | Rejected (409, invalid transition) |
-| `RESOLVED` | `OPEN` | Rejected (409, invalid transition) |
-| `CANCELLED` | `OPEN` | Rejected (409, invalid transition) |
-| `CLOSED` | `IN_PROGRESS` | Rejected (409, invalid transition) |
-| `RESOLVED` | `IN_PROGRESS` | Rejected (409, invalid transition) |
-| `OPEN` | `RESOLVED` | Rejected (409, invalid transition) (must go via `IN_PROGRESS`) |
-| `OPEN` | `CLOSED` | Rejected (409, invalid transition) |
-| `IN_PROGRESS` | `CLOSED` | Rejected (409, invalid transition) (must go via `RESOLVED`) |
-| `RESOLVED` | `CANCELLED` | Rejected (409, invalid transition) |
-| Any | Same as current (e.g. `OPEN` → `OPEN`) | Rejected (409, invalid transition) |
+**Single source of truth:** allowed transitions, the full 5×5 matrix, implementation rules, and NFR-07 test mapping are defined in [`spec/state-machine.md`](state-machine.md).
 
 ---
 
@@ -359,7 +318,7 @@ stateDiagram-v2
 
 | ID | Given | When | Then |
 |----|-------|------|------|
-| NFR-07-AC1 | Backend integration test suite with Testcontainers PostgreSQL | Tests run against the real HTTP API and database | Every **allowed** transition in Section 4 is exercised and passes |
+| NFR-07-AC1 | Backend integration test suite with Testcontainers PostgreSQL | Tests run against the real HTTP API and database | Every **allowed** transition in [`spec/state-machine.md`](state-machine.md) is exercised and passes |
 | NFR-07-AC2 | Same suite | Tests run | All **25** from→to cells in the status × status matrix are exercised; each test asserts its **expected outcome** (success for the **5 allowed** transitions; HTTP **409** for the **20 rejected**, including **5 same-status** pairs) |
 | NFR-07-AC3 | CI/build pipeline | Any state-machine integration test fails | Build fails |
 
@@ -379,8 +338,8 @@ stateDiagram-v2
 | Comments can be added | FR-12-AC5, FR-05, FR-10 |
 | Search works | FR-12-AC6, FR-06, FR-08 |
 | Status filter works | FR-12-AC7, FR-07 |
-| Valid status transitions work | FR-12-AC8, FR-09, Section 4 |
-| Invalid status transitions are rejected by backend | FR-09-AC6, FR-09-AC7, Section 4, NFR-07 |
+| Valid status transitions work | FR-12-AC8, FR-09, `spec/state-machine.md` |
+| Invalid status transitions are rejected by backend | FR-09-AC6, FR-09-AC7, `spec/state-machine.md`, NFR-07 |
 | Data survives application restart | NFR-01 |
 | Backend validation works | NFR-02, CRR-04, FR-* validation ACs |
 | UI shows meaningful errors | FR-12-AC9–FR-12-AC13, FR-12-AC14, NFR-03 |
@@ -408,7 +367,7 @@ stateDiagram-v2
 | CLOSED/CANCELLED terminal for field updates; comments still allowed | FR-10, FR-04-AC3, FR-04-AC6 |
 | Status changes only via transition operation; not via PATCH | FR-09; CRR-03 (forbidden `status` on PATCH) |
 | Same-status transition rejected | FR-09-AC6 |
-| Backend state machine (Section 4 summary; SSOT → `state-machine.md`) | FR-09, Section 4, NFR-07 |
+| Backend state machine (§4 summary; SSOT → `state-machine.md`) | FR-09, `spec/state-machine.md`, NFR-07 |
 | Search/list pagination default sort `createdAt` desc | FR-06, FR-07, FR-08 |
 | Pagination: default size 20, max 100, page index starts at 0 | FR-02-AC3, FR-08-AC1 |
 | Invalid status filter → HTTP 400 | FR-07-AC2 |
@@ -438,20 +397,30 @@ Former open questions; incorporated into requirements above.
 | 9 | PostgreSQL via Docker Compose at runtime; Testcontainers PostgreSQL for integration tests; Flyway migrations (details in `spec/architecture.md`). |
 | 10 | Error format: RFC 7807 Problem Details with a field errors array (URI `type` values and schemas in `spec/api-contract.md`). |
 | 11 | HTTP status codes (full detail in `spec/api-contract.md`): validation errors → **400**; not found → **404**; stale `version` → **409** with Problem Details `type` for stale version; invalid status transition and terminal-ticket field edit → **409** with distinct Problem Details `type` values for each case. |
-| 12 | Create `assignee: ""` stored as null (same as PATCH). Keyword omitted, blank, or whitespace-only → no keyword filter; non-whitespace keywords trimmed before **substring** match. |
+| 12 | Create `assignee: ""` stored as null (same as PATCH). Keyword omitted, blank, or whitespace-only → no keyword filter; non-whitespace keywords trimmed before **literal substring** match (`%` / `_` escaped per FR-06-AC7). |
+| 13 | **Check order** for ticket mutations (PATCH, transition): **404** (ticket not found) → **400** (validation, including CRR) → **409** stale `version` → **409** terminal edit or invalid transition. Rationale: a stale client should reload before interpreting terminal or transition rules. |
 
 ### Deferred to API contract
 
 Not resolved in this document; to be specified in `spec/api-contract.md`:
 
 - Endpoint paths and query parameter names
+- Single list endpoint with optional keyword and status query parameters (no separate search endpoint)
 - Pagination metadata response shape
-- Problem Details `type` URIs (three distinct types: validation, stale version, invalid transition / terminal edit)
+- List item (summary) shape including `version`; detail response shape including `comments` (empty array when none)
+- Transition success response returns the full ticket
+- Sort: whitelist of allowed fields and directions; anything else → HTTP 400
+- Problem Details `type` URIs for four error outcomes: validation (**400**) and three distinct **409** types (stale version, invalid transition, terminal edit)
 - Transition request payload shape
 
-### Deferred to state-machine.md
+### Deferred to ui-flow.md / test-strategy.md
 
-- `state-machine.md` will become the **single source of truth** for allowed and rejected transitions; Section 4 here will then be reduced to a summary plus link.
+- UI message copy per error `type` (FR-12, NFR-03)
+- UI test approach (manual vs automated component tests)
+
+### Deferred to README
+
+- Production CORS or reverse-proxy strategy when the SPA is not served via the Vite dev proxy
 
 ### Open Questions
 
@@ -467,3 +436,5 @@ None at this time.
 | 2026-09-30 | 0.2.0 | — | FR-12 UI; FR-04 assignee/PATCH ACs; NFR-07 state-machine integration tests; traceability split; resolved decisions; FR-11 tidy; AC updates for pagination, filters, errors, comments. |
 | 2026-09-30 | 0.3.0 | — | **Accepted:** FR-09 transition `version`; HTTP 400/404/409 mapping (decisions 10–11); FR-01 assignee `""`; FR-06 keyword/trim; FR-08 invalid pagination; FR-07 list+filter; FR-04 forbidden PATCH props; §1 UI + pending related specs; NFR-07 5×5 matrix; FR-12 detail navigation + terminal UI; data model `id`/`version`; NFR-01 PostgreSQL; NFR-04-AC2 `.env.example`; NFR-06 bounded pages; traceability design rows. **Rejected:** treating pending `architecture.md` / `api-contract.md` references as defects (next planned specs). **Deferred:** creating `api-contract.md` and `architecture.md`. |
 | 2026-09-30 | 0.4.0 | — | **Baselined.** Common request rules (CRR); create `version` 0 + full response; PATCH mutable-field rule; pagination empty over-range page; NFR-07 matrix wording; §4 409 results; PostgreSQL in §1; traceability decision 10/11 split; FR-12 RESOLVED→CLOSED; FR-06 substring; deferred API contract + state-machine sections. Requirements frozen until implementation feedback. |
+| 2026-09-30 | 0.4.1 | — | §4 reduced to summary plus link to `spec/state-machine.md` (SSOT for transitions). |
+| 2026-09-30 | 0.4.2 | — | State-machine cross-refs; FR-09-AC10 invalid target status; decision 13 check order; FR-06 literal/escape; FR-01/FR-05 clarifications; version BIGINT wording; deferred API/UI/README items; header status. |
