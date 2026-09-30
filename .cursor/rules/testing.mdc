@@ -1,0 +1,29 @@
+---
+description: Backend and frontend testing standards
+globs: backend/src/test/**,frontend/**/*.test.*
+alwaysApply: false
+---
+
+# Testing
+
+## Backend
+
+- Unit tests use JUnit 5, AssertJ, and Mockito.
+- Controller slices use `@WebMvcTest`. Repository tests use `@DataJpaTest`.
+- Integration tests use `@SpringBootTest` with Testcontainers PostgreSQL.
+- Name tests `methodName_condition_expectedResult`.
+- Structure each test as Arrange / Act / Assert. One behaviour per test.
+- Cover validation failures and the error response shape, not only happy paths.
+
+## Ticket status machine
+
+- Every valid transition passes. Every invalid transition is rejected.
+- Use parameterized tests for the full status × status matrix.
+
+## Frontend
+
+- Component tests use the framework's standard tools (Vitest or Jest plus Testing Library).
+
+## Failures
+
+- Never weaken or delete a failing test to make a build pass. Fix the code or flag the failure.

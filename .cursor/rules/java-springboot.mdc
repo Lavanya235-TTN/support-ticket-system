@@ -1,0 +1,41 @@
+---
+description: Java 21 and Spring Boot 3 conventions for the backend
+globs: backend/**/*.java
+alwaysApply: false
+---
+
+# Java / Spring Boot
+
+- Java 21, Spring Boot 3.x, Maven.
+- Package by layer: `controller`, `service`, `repository`, `domain` (entity), `dto`, `mapper`, `exception`, `config`.
+
+## Controllers
+
+- Thin controllers only. No business logic.
+- Never return entities. Return DTOs only, as Java records.
+- Annotate request bodies with `@Valid`.
+
+## Dependency injection
+
+- Constructor injection only. Use `final` fields. No field `@Autowired`.
+
+## Domain and services
+
+- Business rules, including ticket status transitions, live in the service or domain layer.
+- Put `@Transactional` on service methods that write.
+- Prefer small methods, meaningful names, and `Optional` over null returns.
+
+## Validation and errors
+
+- Bean Validation (`jakarta.validation`) on request DTOs.
+- Centralize error handling with `@RestControllerAdvice`.
+
+## Persistence
+
+- Spring Data JPA. Flyway owns schema migrations.
+- Do not set `ddl-auto=update` except for local experiments.
+
+## Config and logging
+
+- No secrets in code or committed config. Use environment variables with safe local defaults.
+- SLF4J only. No `System.out`. Never log sensitive data.
