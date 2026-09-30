@@ -47,7 +47,7 @@
 
 ### T-04 — TicketStatus state machine (test-first)
 
-- Status: [ ] todo
+- Status: [x] done
 - Spec refs: `spec/state-machine.md` (full matrix); FR-09, FR-10, NFR-07; `spec/test-strategy.md` (unit matrix)
 - Depends on: T-01
 - Scope: `TicketStatus` enum with `allowedTargets()` / `canTransitionTo(TicketStatus)` encoding the 5×5 matrix. **Test-first:** parameterized JUnit test for all **25** from→to pairs (5 allowed, 20 rejected). **Not yet:** HTTP, JPA.
