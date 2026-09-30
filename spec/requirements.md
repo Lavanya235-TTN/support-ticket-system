@@ -1,6 +1,6 @@
 # Support Ticket Management System — Requirements
 
-**Document status:** Requirements baselined (v0.4.2); design specs are Draft. Frozen until implementation feedback requires changes.
+**Document status:** Baselined v1.0 — ready for planning.
 
 ## 1. Purpose & Scope
 
@@ -19,7 +19,7 @@ Define functional and non-functional requirements for a **Support Ticket Managem
 - Persistent storage in PostgreSQL.
 - Web UI for ticket workflows (FR-12).
 
-**Related specs:** `architecture.md`, `data-model.md`, `state-machine.md` (Draft); **pending:** `api-contract.md`, `ui-flow.md`, `test-strategy.md`.
+**Related specs:** `architecture.md`, `data-model.md`, `state-machine.md`, `api-contract.md`, `ui-flow.md`, `test-strategy.md` (Draft where noted in each file).
 
 ### Out of Scope
 
@@ -82,8 +82,8 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 
 | ID | Given | When | Then |
 |----|-------|------|------|
-| CRR-01 | Request includes a ticket id in the path | Path id is non-numeric | HTTP 400 (decision 11) |
-| CRR-02 | Request includes a ticket id in the path | Path id is well-formed numeric but no ticket exists | HTTP 404 (decision 11) |
+| CRR-01 | Request includes a ticket id in the path | Path id does not parse as a **positive long** (`0`, negatives, decimals, non-numeric) | HTTP 400 (decision 11) |
+| CRR-02 | Request includes a ticket id in the path | Path id parses as a positive long but no ticket exists | HTTP 404 (decision 11) |
 | CRR-03 | Request has a JSON body (create, PATCH, transition, comment) | Body includes unknown or forbidden properties (e.g. `status` on create, `id` / `createdAt` on PATCH) | HTTP 400 (decision 11); no partial apply |
 | CRR-04 | Request violates field validation rules in this spec | Request is rejected for validation | HTTP 400 with RFC 7807 field-level errors (decision 10) |
 
@@ -125,6 +125,7 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 |----|-------|------|------|
 | FR-03-AC1 | Ticket exists | Client requests ticket by numeric id | Full ticket details returned including `version` and comments |
 | FR-03-AC2 | Ticket has multiple comments | Client requests ticket by id | Comments ordered by `createdAt` ascending (oldest first) |
+| FR-03-AC3 | Ticket in a given status | Client requests ticket by id | Response includes `allowedTransitions` computed from [`spec/state-machine.md`](state-machine.md) (e.g. `RESOLVED` → `["CLOSED"]`; `CLOSED` / `CANCELLED` → `[]`) |
 
 ---
 
@@ -153,8 +154,8 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 | ID | Given | When | Then |
 |----|-------|------|------|
 | FR-05-AC1 | Ticket exists (any status) | Client adds comment with valid author and body (no ticket `version` required) | Comment persisted with `createdAt`; visible on ticket detail; ticket `version` and `updatedAt` unchanged |
-| FR-05-AC2 | Author missing or length >100 | Client adds comment | CRR-04 |
-| FR-05-AC3 | Body missing, empty, or length >2000 | Client adds comment | CRR-04 |
+| FR-05-AC2 | Author missing, blank, whitespace-only, or length >100 | Client adds comment | CRR-04 |
+| FR-05-AC3 | Body missing, blank, whitespace-only, or length >2000 | Client adds comment | CRR-04 |
 
 ---
 
@@ -183,6 +184,7 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 | FR-07-AC1 | Tickets in multiple statuses | Client filters by `OPEN` | Only `OPEN` tickets returned (subject to pagination/search) |
 | FR-07-AC2 | Invalid status filter value | Client filters | HTTP 400 with RFC 7807 Problem Details |
 | FR-07-AC3 | Tickets in multiple statuses; no keyword | Client lists with valid single status filter only | Paginated list contains only tickets in that status |
+| FR-07-AC4 | Status query parameter omitted, blank, or whitespace-only | Client lists or searches | No status filter applied (same as `q`; FR-06-AC5) |
 
 ---
 
@@ -196,6 +198,8 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 | FR-08-AC2 | Client omits sort | Client lists or searches | Results ordered by `createdAt` descending |
 | FR-08-AC3 | `page` &lt; 0, `size` &lt; 1, `size` &gt; 100, or non-numeric pagination params | Client lists or searches | HTTP 400 with RFC 7807 Problem Details |
 | FR-08-AC4 | Client requests a page index beyond the last page | Client lists or searches | HTTP 200 with an empty content list; pagination metadata per `spec/api-contract.md` |
+| FR-08-AC5 | Client requests valid `sort` on `createdAt`, `updatedAt`, or `title` with `asc` or `desc` | Client lists or searches | Results ordered per requested field and direction |
+| FR-08-AC6 | Client requests invalid or unsupported `sort` (unknown field, bad direction, malformed) | Client lists or searches | HTTP 400 with RFC 7807 Problem Details |
 
 ---
 
@@ -215,6 +219,7 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 | FR-09-AC8 | Transition request omits `version` | Client requests transition | HTTP 400 (decision 11) |
 | FR-09-AC9 | Transition submitted with stale `version` | Client requests transition | HTTP 409; stale version `type`; status unchanged |
 | FR-09-AC10 | Transition body includes unknown or invalid target `status` value | Client requests transition | HTTP 400 with RFC 7807 field-level errors (CRR-04) |
+| FR-09-AC11 | Allowed transition succeeds | Client requests transition with current `version` | HTTP **200** with full ticket detail including updated `status`, `version`, `updatedAt`, and `allowedTransitions` per `spec/api-contract.md` |
 
 ---
 
@@ -239,6 +244,7 @@ Applies to every API operation unless an FR states otherwise. FR-01, FR-04, FR-0
 |----|-------|------|------|
 | FR-11-AC1 | Client A successfully updates at version *V* | Client B submits PATCH still using version *V* | HTTP 409; Problem Details `type` identifies stale version; A's changes remain |
 | FR-11-AC2 | Client A successfully transitions at version *V* | Client B submits transition still using version *V* | HTTP 409; Problem Details `type` identifies stale version; status unchanged by B |
+| FR-11-AC3 | Client loads ticket at version *V* and submits update with matching request `version` | Another client updates the same ticket before save completes (JPA `@Version` / optimistic lock) | HTTP **409** stale-version `type`; see `spec/architecture.md` stale detection |
 
 ---
 
@@ -277,9 +283,12 @@ Ticket status changes only through the dedicated transition operation (FR-09). T
 
 ### NFR-01 — Persistence across restart
 
+Verified by a **required manual acceptance check** (Docker Compose DB + backend restart; data still present). An automated persistence test is **optional** (see `spec/test-strategy.md`).
+
 | ID | Given | When | Then |
 |----|-------|------|------|
 | NFR-01-AC1 | Tickets and comments stored in PostgreSQL (Docker Compose at runtime) | Application or database container restarts (graceful) | Previously stored tickets and comments are still retrievable with unchanged content |
+| NFR-01-AC2 | Manual acceptance procedure in `spec/test-strategy.md` | Operator restarts PostgreSQL and backend containers after creating sample data | Same tickets and comments retrievable via API with unchanged content |
 
 ### NFR-02 — Backend validation
 
@@ -397,26 +406,21 @@ Former open questions; incorporated into requirements above.
 | 9 | PostgreSQL via Docker Compose at runtime; Testcontainers PostgreSQL for integration tests; Flyway migrations (details in `spec/architecture.md`). |
 | 10 | Error format: RFC 7807 Problem Details with a field errors array (URI `type` values and schemas in `spec/api-contract.md`). |
 | 11 | HTTP status codes (full detail in `spec/api-contract.md`): validation errors → **400**; not found → **404**; stale `version` → **409** with Problem Details `type` for stale version; invalid status transition and terminal-ticket field edit → **409** with distinct Problem Details `type` values for each case. |
-| 12 | Create `assignee: ""` stored as null (same as PATCH). Keyword omitted, blank, or whitespace-only → no keyword filter; non-whitespace keywords trimmed before **literal substring** match (`%` / `_` escaped per FR-06-AC7). |
-| 13 | **Check order** for ticket mutations (PATCH, transition): **404** (ticket not found) → **400** (validation, including CRR) → **409** stale `version` → **409** terminal edit or invalid transition. Rationale: a stale client should reload before interpreting terminal or transition rules. |
+| 12 | Create `assignee: ""` stored as null (same as PATCH). Keyword omitted, blank, or whitespace-only → no keyword filter; **status** filter omitted, blank, or whitespace-only → no status filter (**FR-07-AC4**); non-whitespace keywords trimmed before **literal substring** match (`%` / `_` escaped per FR-06-AC7). |
+| 13 | **Check order** for ticket mutations (PATCH fields, PATCH status, POST comment): **400** (request validation, including malformed path id, CRR-03/CRR-04, `@Valid` bodies) → **404** (ticket not found) → **409** stale `version` → **409** terminal-ticket edit or invalid transition. Rationale: Bean Validation on `@Valid` DTOs runs at the controller before service load; matches Spring’s natural order. Stale `version` still precedes terminal/transition domain rules. |
 
-### Deferred to API contract
+### Resolved in design specs (v0.4.3)
 
-Not resolved in this document; to be specified in `spec/api-contract.md`:
+Former deferrals; normative detail in the linked documents:
 
-- Endpoint paths and query parameter names
-- Single list endpoint with optional keyword and status query parameters (no separate search endpoint)
-- Pagination metadata response shape
-- List item (summary) shape including `version`; detail response shape including `comments` (empty array when none)
-- Transition success response returns the full ticket
-- Sort: whitelist of allowed fields and directions; anything else → HTTP 400
-- Problem Details `type` URIs for four error outcomes: validation (**400**) and three distinct **409** types (stale version, invalid transition, terminal edit)
-- Transition request payload shape
-
-### Deferred to ui-flow.md / test-strategy.md
-
-- UI message copy per error `type` (FR-12, NFR-03)
-- UI test approach (manual vs automated component tests)
+| Topic | Resolved in |
+|-------|-------------|
+| Endpoint paths, query names (`q`, `status`, `page`, `size`, `sort`); single GET list/search/filter endpoint | `spec/api-contract.md` |
+| Pagination DTO (`content`, `page`, `size`, `totalElements`, `totalPages`); TicketSummary and TicketDetail shapes; transition **200** returns full TicketDetail; TransitionRequest `{ version, status }` | `spec/api-contract.md` |
+| Sort whitelist and default `createdAt,desc`; invalid sort → **400** | `spec/api-contract.md` |
+| Problem Details `type` URIs (`/problems/validation-error`, `not-found`, `stale-version`, `invalid-transition`, `terminal-ticket`, `internal-error`) | `spec/api-contract.md` |
+| UI error copy and placement per Problem Details type | `spec/ui-flow.md` |
+| UI test approach (Vitest component tests + optional manual smoke) | `spec/test-strategy.md` |
 
 ### Deferred to README
 
@@ -438,3 +442,5 @@ None at this time.
 | 2026-09-30 | 0.4.0 | — | **Baselined.** Common request rules (CRR); create `version` 0 + full response; PATCH mutable-field rule; pagination empty over-range page; NFR-07 matrix wording; §4 409 results; PostgreSQL in §1; traceability decision 10/11 split; FR-12 RESOLVED→CLOSED; FR-06 substring; deferred API contract + state-machine sections. Requirements frozen until implementation feedback. |
 | 2026-09-30 | 0.4.1 | — | §4 reduced to summary plus link to `spec/state-machine.md` (SSOT for transitions). |
 | 2026-09-30 | 0.4.2 | — | State-machine cross-refs; FR-09-AC10 invalid target status; decision 13 check order; FR-06 literal/escape; FR-01/FR-05 clarifications; version BIGINT wording; deferred API/UI/README items; header status. |
+| 2026-09-30 | 0.4.3 | — | Added `api-contract.md`, `ui-flow.md`, `test-strategy.md`; resolved §7 API and UI/test deferrals; requirements remain baselined. |
+| 2026-09-30 | 1.0.0 | — | Review patch: CRR-01 positive long; decision 13 order; FR-03/05/07/08/09/11 ACs; NFR-01 manual acceptance; baselined v1.0 for planning. |

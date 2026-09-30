@@ -1,6 +1,6 @@
 # Ticket Status State Machine
 
-**Document status:** Draft (v0.1.0). **Single source of truth** for allowed and rejected status transitions. Traces to `spec/requirements.md` FR-09, FR-10, NFR-07.
+**Document status:** Baselined v1.0 — ready for planning.
 
 ## Purpose
 
@@ -53,11 +53,11 @@ Linear happy path: `OPEN` → `IN_PROGRESS` → `RESOLVED` → `CLOSED`.
 
 Cancellation: `OPEN` → `CANCELLED`; `IN_PROGRESS` → `CANCELLED`.
 
-All other changes of `status` via the transition operation are **rejected**.
+All other changes of `status` via **PATCH** `/api/v1/tickets/{id}/status` are **rejected** when not allowed below.
 
 ### Full 5×5 transition matrix
 
-Rows = **current** status; columns = **requested target** status. Outcomes: **Allowed** (200, status updated, `version` incremented, `updatedAt` refreshed) or **Rejected 409** (invalid transition `type`; status unchanged). Stale `version` is always **Rejected 409** (stale version `type`) before transition rules are evaluated (FR-09-AC9, FR-11-AC2).
+Rows = **current** status; columns = **requested target** status. Operation: **PATCH** `/api/v1/tickets/{id}/status` with `{ version, status }`. Outcomes: **Allowed** (200 + full TicketDetail, status updated, `version` incremented, `updatedAt` refreshed) or **Rejected 409** (invalid transition `type`; status unchanged). After ticket load, stale `version` → **409** stale-version before transition rules (FR-09-AC9, FR-11-AC2). Request validation failures → **400** before load (decision 13).
 
 | From \ To | OPEN | IN_PROGRESS | RESOLVED | CLOSED | CANCELLED |
 |-----------|------|-------------|----------|--------|-----------|
@@ -90,7 +90,7 @@ Explicit examples from requirements (all Rejected 409 unless noted):
 3. **Version required:** Transition request must include current ticket `version`; omission → **400** (FR-09-AC8).
 4. **Stale version:** If request `version` does not match persisted `version` → **409** stale version; status unchanged (FR-09-AC9, FR-11-AC2).
 5. **Success:** On **Allowed**, persist new status, increment `version`, set `updatedAt` (FR-09-AC1–AC5).
-6. **Authority:** Status cannot be changed via general PATCH (CRR-03); only via transition operation (FR-09).
+6. **Authority:** Status cannot be changed via general PATCH on `/tickets/{id}` (CRR-03); only via **PATCH** `/api/v1/tickets/{id}/status` (FR-09).
 
 Field updates on terminal tickets are blocked separately (FR-04-AC3, FR-10-AC4)—not part of this matrix but same **409** family with terminal-edit `type`.
 
@@ -106,13 +106,13 @@ Field updates on terminal tickets are blocked separately (FR-04-AC3, FR-10-AC4)�
 
 | NFR ID | Test approach |
 |--------|----------------|
-| NFR-07-AC1 | For each of the **5 Allowed** cells, integration test: create ticket in `From` state (or transition setup), POST transition with matching `version`, assert 200 and target status. |
+| NFR-07-AC1 | For each of the **5 Allowed** cells, integration test: create ticket in `From` state (or transition setup), **PATCH** `/api/v1/tickets/{id}/status` with matching `version`, assert **200** and target status (and full TicketDetail per FR-09-AC11). |
 | NFR-07-AC2 | **Parameterized** integration test over all **25** matrix cells; assert **Allowed** vs **409 invalid transition** per table above; include same-status diagonal cases. |
 | NFR-07-AC3 | Suite runs in CI; failure fails build. |
 
 ### Additional cases (outside the 5×5 matrix)
 
-Not counted in the 25 matrix cells (NFR-07-AC2). See **FR-09** and requirements decision 13 (check order).
+Not counted in the 25 matrix cells (NFR-07-AC2). See **FR-09** and requirements **decision 13** (check order: **400** → **404** → **409** stale → **409** domain).
 
 | Case | Outcome |
 |------|---------|
@@ -133,3 +133,4 @@ None.
 |------|---------|--------|---------|
 | 2026-09-30 | 0.1.0 | — | Initial SSOT: states, diagram, allowed table, 5×5 matrix, rules, implementation and NFR-07 test mapping. |
 | 2026-09-30 | 0.1.1 | — | Additional cases outside 5×5 matrix (400/404/409); links to FR-09. |
+| 2026-09-30 | 1.0.0 | — | PATCH status endpoint; NFR-07 wording; decision 13 order; baselined v1.0. |

@@ -1,6 +1,6 @@
 # Data Model — Support Ticket Management System
 
-**Document status:** Draft (v0.1.0). Traces to `spec/requirements.md` (v0.4.0+). JSON field names and API shapes: `spec/api-contract.md`.
+**Document status:** Baselined v1.0 — ready for planning.
 
 ## Purpose
 
@@ -78,7 +78,7 @@ Comments are append-only (no `updated_at`).
 | `idx_ticket_created_at` | `ticket(created_at DESC)` or `(created_at)` | Default list sort `createdAt` desc (FR-02-AC1, FR-08-AC2) |
 | `idx_ticket_comment_ticket_created` | `ticket_comment(ticket_id, created_at)` | Detail view: comments chronological (FR-03-AC2) |
 
-**Search (FR-06):** Case-insensitive literal substring on `title` and `description` via `LOWER(...) LIKE` with escaped `%` / `_` in the keyword. Acceptable at expected POC scale. **Not implemented:** `pg_trgm` GIN indexes—future optimisation if volume grows.
+**Search (FR-06):** Case-insensitive literal substring on **title OR description** via `LOWER(...) LIKE` with escaped `%` / `_` in the keyword. Acceptable at expected POC scale. **Not implemented:** `pg_trgm` GIN indexes—future optimisation if volume grows.
 
 ### Entity ↔ table mapping
 
@@ -97,7 +97,7 @@ API JSON naming (camelCase) is normative in `spec/api-contract.md`. Logical fiel
 | **UpdateTicketRequest** | `version`, `title`, `description`, `priority`, `assignee` (partial; at least one mutable field besides `version`) |
 | **TransitionRequest** | `version`, `status` (target) |
 | **CreateCommentRequest** | `author`, `body` |
-| **TicketResponse** (detail) | `id`, `title`, `description`, `priority`, `status`, `assignee`, `createdAt`, `updatedAt`, `version`, `comments` (always present; **empty array** when none) |
+| **TicketResponse** (detail) | `id`, `title`, `description`, `priority`, `status`, `assignee`, `createdAt`, `updatedAt`, `version`, `comments` (always present; **empty array** when none), `allowedTransitions` |
 | **CommentResponse** | `id`, `author`, `body`, `createdAt` |
 | **TicketSummary** (list item) | Ticket fields including `version`; **never** includes `comments` (exact field set in `spec/api-contract.md`) |
 
@@ -122,3 +122,4 @@ None.
 |------|---------|--------|---------|
 | 2026-09-30 | 0.1.0 | — | Initial data model (ER diagram, tables, indexes, mapping, Flyway V1–V2). |
 | 2026-09-30 | 0.1.1 | — | API vs DB validation note; detail/list response shapes; FR-06 literal search. |
+| 2026-09-30 | 1.0.0 | — | Detail DTO `allowedTransitions` (FR-03-AC3); baselined v1.0. |

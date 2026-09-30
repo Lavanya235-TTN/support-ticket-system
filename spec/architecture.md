@@ -1,6 +1,6 @@
 # Architecture — Support Ticket Management System
 
-**Document status:** Draft (v0.1.0). Traces to `spec/requirements.md` (v0.4.0+).
+**Document status:** Baselined v1.0 — ready for planning.
 
 ## Purpose
 
@@ -88,8 +88,8 @@ Invalid transitions and terminal-ticket edits map to **409** with distinct Probl
 
 ### Search and list
 
-- **Keyword (FR-06):** Case-insensitive literal substring match on `title` and `description` via JPA **Specification** (or JPQL with `LOWER(column) LIKE LOWER(:pattern)`); escape `%` and `_` in the keyword (FR-06-AC7). Keyword trimmed; omitted/blank/whitespace-only → no keyword predicate.
-- **Status filter (FR-07):** Single status value; invalid enum → 400.
+- **Keyword (FR-06):** Case-insensitive literal substring match on **title OR description** (ticket included if either field matches); escape `%` and `_` in the keyword (FR-06-AC7). Keyword trimmed; omitted/blank/whitespace-only → no keyword predicate.
+- **Status filter (FR-07):** Single status value; omitted/blank/whitespace-only → no filter; invalid enum → 400.
 - **Combination:** Keyword and status filters are **AND**ed (FR-06-AC4, FR-07-AC3).
 - **Pagination (FR-08):** Spring `Pageable`; default sort `createdAt` descending; page size default 20, max 100, page index from 0.
 
@@ -133,19 +133,20 @@ sequenceDiagram
   participant R as TicketRepository
   participant DB as PostgreSQL
 
-  UI->>C: POST transition (targetStatus, version)
+  UI->>C: PATCH /api/v1/tickets/{id}/status (status, version)
+  C->>C: Validate path id and @Valid body
+  alt Path id or body invalid
+    C-->>UI: 400 RFC 7807 field errors
+  else Valid request
   C->>S: transition(ticketId, dto)
   S->>R: findById(ticketId)
   R->>DB: SELECT ticket
-  DB-->>R: row (status, version)
-  R-->>S: Ticket
+  DB-->>R: row or empty
+  R-->>S: Ticket or empty
 
   alt Ticket not found
     S-->>C: NotFoundException
     C-->>UI: 404 RFC 7807
-  else Request body fails validation (e.g. missing version, invalid target status)
-    S-->>C: validation error
-    C-->>UI: 400 RFC 7807 field errors
   else version != entity.version
     S-->>C: StaleVersionException
     C-->>UI: 409 stale version
@@ -163,13 +164,14 @@ sequenceDiagram
     S-->>C: TicketResponse DTO
     C-->>UI: 200 full ticket
   end
+  end
 ```
 
-Request handling order for PATCH and transition follows requirements **decision 13**: 404 → 400 (validation) → 409 stale `version` → 409 terminal edit or invalid transition. Malformed JSON and CRR-03 unknown properties may be rejected at the controller boundary before the service runs.
+Request handling order for PATCH, transition, and comment flows follows requirements **decision 13**: **400** (path id, `@Valid`, CRR-03/CRR-04) → **404** (not found) → **409** stale `version` → **409** terminal edit or invalid transition.
 
-**Stale detection (FR-11):** The service compares the request `version` to the loaded entity first. If another client updates the ticket between read and `save`, JPA `@Version` can still raise `OptimisticLockException`; map that to the same **409** stale-version `type` as an explicit version mismatch.
+**Stale detection (FR-11, FR-11-AC3):** The service compares request `version` to the loaded entity; mismatch → **409** stale-version. If another client updates between read and `save`, JPA `@Version` may raise `OptimisticLockException`; map to the same **409** stale-version `type`.
 
-PATCH and comment flows follow the same layering; PATCH adds terminal-status check (FR-04-AC3) after stale-version check per decision 13.
+PATCH field updates add terminal-status check (FR-04-AC3) after stale-version check per decision 13.
 
 ### Architecture Decision Records
 
@@ -205,7 +207,7 @@ PATCH and comment flows follow the same layering; PATCH adds terminal-status che
 
 ## Open Questions
 
-None. Endpoint and Problem Details URI details remain in `spec/api-contract.md` (requirements §7).
+None.
 
 ## Change Log
 
@@ -213,3 +215,4 @@ None. Endpoint and Problem Details URI details remain in `spec/api-contract.md` 
 |------|---------|--------|---------|
 | 2026-09-30 | 0.1.0 | — | Initial architecture spec (stack, layering, enforcement, search, config, topology, sequence diagram, ADRs). |
 | 2026-09-30 | 0.1.1 | — | Transition sequence 400 alt; decision 13 note; stale detection (explicit version + OptimisticLockException); FR-06 literal escape. |
+| 2026-09-30 | 1.0.0 | — | PATCH status path; decision 13 order; q OR semantics; FR-11-AC3 cross-ref; baselined v1.0. |
