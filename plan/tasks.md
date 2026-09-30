@@ -34,7 +34,7 @@
 
 ### T-03 — Flyway wired; app starts against Compose DB
 
-- Status: [ ] todo
+- Status: [x] done
 - Spec refs: `spec/architecture.md` ADR-002; `spec/data-model.md` (migration plan overview); NFR-01
 - Depends on: T-02
 - Scope: Add JPA, PostgreSQL driver, and Flyway; `ddl-auto=none`; empty `backend/src/main/resources/db/migration/` (Flyway runs with **zero** migrations). **Not yet:** V1/V2 SQL (T-06), domain entities.
