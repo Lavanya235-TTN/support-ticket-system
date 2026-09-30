@@ -69,7 +69,7 @@
 
 ### T-06 — Flyway V1/V2 migrations
 
-- Status: [ ] todo
+- Status: [x] done
 - Spec refs: `spec/data-model.md` (tables, indexes, CHECK constraints)
 - Depends on: T-03
 - Scope: `V1__create_ticket.sql`, `V2__create_ticket_comment.sql` per data model. **Not yet:** Java entities.
