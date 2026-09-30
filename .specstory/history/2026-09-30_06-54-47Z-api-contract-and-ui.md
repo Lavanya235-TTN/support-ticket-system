@@ -1613,15 +1613,200 @@ _**User**_
 
 _**Agent (auto-smart)**_
 
+<think><details><summary>Thought Process</summary>
+Appending entry #9 to prompt-history.md for the last prompt. This covered creating plan/tasks.md, implement-task.md, and updating codebase-map.md.
+</details></think>
+
+_**Agent (auto-smart)**_
+
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/docs/prompt-history.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Appending entry 9 for the Plan/Tasks phase.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/docs/prompt-history.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Brief reply sent.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+Appended **#9** to `docs/prompt-history.md` (Plan / Tasks — `plan/tasks.md`, implement-task command, codebase-map).
+
+---
+
+_**User**_
+
+Revise plan/tasks.md (version 1.1.0, add Change Log entry). Keep everything else unchanged.
+
+1. Split T-24 into three tasks (renumber following tasks and update all coverage tables):
+   - T-24 Detail view + edit fields: /tickets/:id, non-numeric id → not-found view without API
+     call, 404 view, PATCH form sending version, field-level validation errors, stale-version
+     banner with Reload
+   - T-25 Status actions: buttons from allowedTransitions, PATCH status, invalid-transition /
+     terminal-ticket banners, terminal tickets disable edit + status actions
+   - T-26 Comments: list ascending, add comment form, field errors, comments enabled on
+     terminal tickets
+   Each with its own component tests and FR-12 AC refs.
+2. T-03: Scope is only adding JPA, PostgreSQL driver and Flyway with ddl-auto=none and an empty
+   db/migration folder (Flyway runs with zero migrations). Done when: with Compose up, backend
+   starts and logs a successful Flyway run. Remove the "prefer/optional" wording.
+3. T-10: use Spring's built-in ProblemDetail / ErrorResponse support (Spring Boot 3), setting
+   type URIs and adding an "errors" property for validation; no custom problem record classes.
+4. T-11: explicitly map both MethodArgumentTypeMismatchException (e.g. "abc") and
+   ConstraintViolationException / HandlerMethodValidationException (e.g. 0, -1) to 400
+   validation-error; test both.
+5. T-21: add MSW setup for Vitest (handlers file + test setup) so later component tests can mock
+   the API.
+6. Re-check that no task exceeds ~5 files; flag any that do.
+
+---
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Splitting T-24 into T-24, T-25, and T-26. Renumbering subsequent tasks to T-27 through T-30. Updating T-03 scope.
+
+Updating T-10 for Spring ProblemDetail, T-11 for exception mapping, and T-21 for MSW. Re-checking file counts and flagging any task exceeding roughly five files. Adding version 1.1.0 and a changelog entry. Dependencies for the new tasks are being mapped out.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/plan/tasks.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Updating the document header to version 1.1.0 and adding a changelog entry. T-03 scope and completion dates are being revised. T-10 is being updated to use Spring ProblemDetail.
+
+T-11 will explicitly map MethodArgumentTypeMismatchException and validation exceptions to 400 responses. T-21 adds MSW setup for Vitest. T-24 is split into T-24, T-25, and T-26, with downstream tasks renumbered. A new section will flag tasks exceeding five expected files.
+
+T-12 is flagged as exceeding five files. T-14 through T-16 are within limits. T-10 stays near five. The split T-24 through T-26 tasks should remain near five each. T-27 now depends on T-26. Assignment tables are being updated to reflect the new task numbers. Feature requirements are mapped to the revised task list.
+
+NFR-04 maps to T-29 and NFR-02 to T-28. Confirmation text spans T-01 through T-30. T-25 covers status actions and depends on T-24 and T-15. T-26 handles comments and depends on T-24 and T-16. T-27 fills remaining gaps and depends on T-26. The status header will read Planning v1.1.0. Feature requirement mappings for T-24 through T-27 are being finalized.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+Applying revisions to `plan/tasks.md`: updating T-03, T-10, T-11, T-21, splitting M7 tasks, renumbering M8, and refreshing coverage tables plus file-count notes.
+
+
+
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/plan/tasks.md</summary>
 
 </details></tool-use>
 
 _**Agent (auto-smart)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
-<summary>Tool use: **edit_file_v2**</summary>
-Status: **loading**
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/plan/tasks.md</summary>
 
 </details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/plan/tasks.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/plan/tasks.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/plan/tasks.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/plan/tasks.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/plan/tasks.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Added a file-count flag to T-12 noting tasks exceeding five files.
+
+T-25 disables editing on terminal statuses. This intentionally overlaps with T-24's edit form. The dependency is correct.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+**`plan/tasks.md` v1.1.0**
+
+- **T-24 → T-24/T-25/T-26** (detail+edit, status, comments); former T-25–T-28 → **T-27–T-30**
+- **T-03:** empty `db/migration`, zero migrations, Flyway success in logs
+- **T-10:** Spring `ProblemDetail` / `ErrorResponse`, no custom problem DTOs
+- **T-11:** `MethodArgumentTypeMismatchException` + `ConstraintViolationException` / `HandlerMethodValidationException` → 400; tests for `abc` and `0`/`-1`
+- **T-21:** MSW handlers + Vitest setup
+- **Coverage tables** updated for T-01–T-30
+- **File count notes:** flagged **T-12** (~6–8), **T-21** (~6); T-24–T-26 kept ~5 via split
+- **Change log** 1.1.0 entry added
+
+---
+
+_**User**_
+
+/log-prompt 
+
+---
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Appending entry #10 to prompt-history for the plan/tasks.md v1.1.0 revision.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/docs/prompt-history.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+The prompt was logged successfully.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+Appended **#10** to `docs/prompt-history.md` (Plan / Tasks — `plan/tasks.md` v1.1.0 revision).

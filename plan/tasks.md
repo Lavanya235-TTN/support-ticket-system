@@ -1,6 +1,6 @@
 # Implementation Tasks — Support Ticket Management System
 
-**Status:** Planning (derived from `spec/` baselined v1.0).
+**Status:** Planning v1.1.0 (derived from `spec/` baselined v1.0).
 
 ## How to execute
 
@@ -37,9 +37,9 @@
 - Status: [ ] todo
 - Spec refs: `spec/architecture.md` ADR-002; `spec/data-model.md` (migration plan overview); NFR-01
 - Depends on: T-02
-- Scope: Add Flyway + JPA + PostgreSQL driver; enable Flyway; `ddl-auto=none`; empty or placeholder migration acceptable only if app starts—**prefer** holding V1/V2 SQL for T-06 (document `spring.flyway.enabled` with optional baseline). Minimum: Flyway autoconfig + health; app connects to Compose PostgreSQL. **Not yet:** domain tables (unless minimal smoke migration agreed in task).
-- Files: `backend/pom.xml`, `backend/src/main/resources/application.yml`, optional `backend/src/main/resources/db/migration/.gitkeep` or README note
-- Done when: With Compose up, `mvn spring-boot:run` in `backend/` starts without error against DB; Flyway runs
+- Scope: Add JPA, PostgreSQL driver, and Flyway; `ddl-auto=none`; empty `backend/src/main/resources/db/migration/` (Flyway runs with **zero** migrations). **Not yet:** V1/V2 SQL (T-06), domain entities.
+- Files: `backend/pom.xml`, `backend/src/main/resources/application.yml`, `backend/src/main/resources/db/migration/.gitkeep`
+- Done when: With Compose up, `mvn spring-boot:run` in `backend/` starts; logs show a **successful Flyway run** (no pending migrations)
 
 ---
 
@@ -112,8 +112,8 @@
 - Status: [ ] todo
 - Spec refs: `spec/api-contract.md` (Problem Details types); NFR-02-AC2; CRR-04; decisions 10–11
 - Depends on: T-09
-- Scope: `@RestControllerAdvice`, Problem Detail response records, `/problems/*` types; validation `errors[]`; 500 internal without stack trace. `@WebMvcTest` on a stub controller or standalone advice tests.
-- Files: exception handler, problem DTOs, tests
+- Scope: `@RestControllerAdvice` using Spring Boot 3 **`ProblemDetail`** / **`ErrorResponse`** (no custom problem record classes); set `/problems/*` **type** URIs; add **`errors`** property for validation failures; 500 internal without stack trace. `@WebMvcTest` on stub controller or advice tests.
+- Files: exception handler, tests (extend handler only if needed for `errors` array)
 - Done when: Tests assert `type`, `status`, `errors` for sample 400/404/409 cases
 
 ### T-11 — Unknown JSON properties + path id validation
@@ -121,9 +121,9 @@
 - Status: [ ] todo
 - Spec refs: CRR-01, CRR-03; `spec/api-contract.md` (DTO allow-lists, check order); decision 13
 - Depends on: T-10
-- Scope: Jackson `FAIL_ON_UNKNOWN_PROPERTIES` on request DTOs; positive-long path `{id}` parsing → 400 before service. Tests for unknown field on create, invalid id `0`/abc.
-- Files: `config/Jackson` or `application.yml`, path validator/helper, tests
-- Done when: `@WebMvcTest` proves unknown property → 400; invalid path id → 400
+- Scope: Jackson `FAIL_ON_UNKNOWN_PROPERTIES` on request DTOs. Map **`MethodArgumentTypeMismatchException`** (e.g. path id `abc`) and **`ConstraintViolationException`** / **`HandlerMethodValidationException`** (e.g. id `0`, `-1`) to **400** `/problems/validation-error`. `@WebMvcTest`: unknown JSON property on create; test **both** non-numeric path id and numeric-but-invalid (`0`, `-1`).
+- Files: Jackson config, `@ControllerAdvice` handlers (or extend T-10), path/`@Min` validation as needed, tests
+- Done when: `@WebMvcTest` proves unknown property → 400; `abc` and `0`/`-1` path ids → 400 validation-error
 
 ---
 
@@ -218,14 +218,14 @@
 - Files: `frontend/package.json`, `vite.config.ts`, `src/main.tsx`, etc.
 - Done when: `npm run build` succeeds
 
-### T-21 — Router, TanStack Query, API client, proxy
+### T-21 — Router, TanStack Query, API client, proxy, MSW
 
 - Status: [ ] todo
-- Spec refs: `spec/ui-flow.md` (routes); `spec/api-contract.md`; NFR-03
+- Spec refs: `spec/ui-flow.md` (routes); `spec/api-contract.md`; NFR-03; `spec/test-strategy.md`
 - Depends on: T-20
-- Scope: React Router routes shell; TanStack Query provider; typed fetch client for `/api/v1`; parse RFC 7807 Problem Details; Vite dev proxy `/api` → backend:8080.
-- Files: `frontend/src/api/*`, `frontend/vite.config.ts`, router setup
-- Done when: Dev server starts; proxy config present; unit test for problem parser optional
+- Scope: React Router routes shell; TanStack Query provider; typed fetch client for `/api/v1`; parse RFC 7807 Problem Details; Vite dev proxy `/api` → backend:8080. **MSW** for Vitest: handlers module + `setupTests` (or `vitest.setup.ts`) so later component tests can mock the API.
+- Files: `frontend/src/api/*`, `frontend/vite.config.ts`, router setup, `frontend/src/mocks/handlers.ts`, test setup file
+- Done when: Dev server starts; proxy configured; `npm run test` runs with MSW wired (smoke test optional)
 
 ---
 
@@ -249,29 +249,47 @@
 - Files: create page/components
 - Done when: Component test: submit → navigate; Vitest passes
 
-### T-24 — Detail: edit, transitions, comments, errors
+### T-24 — Detail view + edit fields
 
 - Status: [ ] todo
-- Spec refs: FR-12-AC3–AC5, AC8, AC10–AC14; FR-03–FR-05, FR-04, FR-09; `spec/ui-flow.md` detail + error mapping
-- Depends on: T-23, T-14, T-15, T-16
-- Scope: `/tickets/:id` — non-numeric id → not-found without API; PATCH, status buttons from `allowedTransitions`, comments, terminal disabled edit, Problem Details banners.
-- Files: detail page/components
-- Done when: Component tests for terminal, stale banner, 404; `npm run test` passes
+- Spec refs: FR-12-AC3, AC4, AC9, AC10, AC13; FR-03, FR-04; `spec/ui-flow.md` (detail, error mapping: validation, not-found, stale-version)
+- Depends on: T-23, T-14
+- Scope: `/tickets/:id` — load GET detail; **non-numeric** `:id` → not-found view **without** API call; API **404** not-found page; editable fields + Save (PATCH with `version`); field-level **400** errors; **stale-version** banner with **Reload**. Component tests for 404, validation, stale. **Not yet:** status buttons, comment form.
+- Files: detail page, edit form components, `*.test.tsx` (detail/edit)
+- Done when: `npm run test` — detail/edit component tests pass
 
-### T-25 — Frontend component test coverage gap fill
+### T-25 — Status actions
+
+- Status: [ ] todo
+- Spec refs: FR-12-AC8, AC11, AC12, AC14; FR-09; `spec/ui-flow.md` (status actions, invalid-transition / terminal-ticket banners)
+- Depends on: T-24, T-15
+- Scope: Status buttons from `allowedTransitions`; PATCH `/tickets/{id}/status`; **invalid-transition** and **terminal-ticket** banners; on terminal tickets **disable** field edit and status actions (FR-12-AC14). Component tests for allowed transition mock and 409 banners. **Not yet:** comments.
+- Files: status action components on detail route, tests
+- Done when: `npm run test` — status component tests pass
+
+### T-26 — Comments on detail
+
+- Status: [ ] todo
+- Spec refs: FR-12-AC5, AC14; FR-05, FR-03-AC2; `spec/ui-flow.md` (comments section)
+- Depends on: T-24, T-16
+- Scope: Comments list **ascending** `createdAt`; add-comment form (author, body); field errors on **400**; form **enabled** on terminal tickets. Component tests for append and validation. **Not yet:** list/create routes changes.
+- Files: comment list/form components, tests
+- Done when: `npm run test` — comment component tests pass
+
+### T-27 — Frontend component test coverage gap fill
 
 - Status: [ ] todo
 - Spec refs: `spec/test-strategy.md` frontend table; NFR-03, NFR-05
-- Depends on: T-24
-- Scope: Vitest + Testing Library: list debounce mock, error mapping cases not covered in T-24.
-- Files: `*.test.tsx`
+- Depends on: T-26
+- Scope: Vitest + MSW: list debounce/search mock, error mapping cases not covered in T-24–T-26.
+- Files: `*.test.tsx` (e.g. list)
 - Done when: `npm run test` passes
 
 ---
 
 ## Milestone M8 — Hardening
 
-### T-26 — OpenAPI vs api-contract alignment
+### T-28 — OpenAPI vs api-contract alignment
 
 - Status: [ ] todo
 - Spec refs: `spec/api-contract.md` (springdoc note); NFR-02
@@ -280,7 +298,7 @@
 - Files: controller annotations, optional `docs/openapi-checklist.md`
 - Done when: `/v3/api-docs` reviewed; gaps documented or fixed
 
-### T-27 — README and secrets hygiene
+### T-29 — README and secrets hygiene
 
 - Status: [ ] todo
 - Spec refs: NFR-04; `spec/architecture.md`; README structure in documentation skill
@@ -289,11 +307,11 @@
 - Files: `README.md`, verify `.gitignore`
 - Done when: New developer can follow README; no secrets in tree
 
-### T-28 — Manual acceptance + final review-code
+### T-30 — Manual acceptance + final review-code
 
 - Status: [ ] todo
 - Spec refs: NFR-01-AC2; `spec/test-strategy.md` manual checklist; requirements §6 assignment criteria; `/review-code`
-- Depends on: T-25, T-27
+- Depends on: T-27, T-29
 - Scope: Execute manual NFR-01 restart checklist; walk all **15** assignment criteria; run `.cursor/commands/review-code` on backend + frontend; fix or log issues.
 - Files: optional `docs/acceptance-log.md`
 - Done when: Checklist signed off in task notes or acceptance log; review-code findings addressed or waived with reason
@@ -325,14 +343,17 @@
 | T-17 | NFR-07 |
 | T-18 | FR-11, decision 13 |
 | T-19 | FR-01–FR-05, FR-09 |
-| T-20–T-21 | FR-12 (infra), NFR-03 |
+| T-20 | NFR-05 |
+| T-21 | FR-12 (infra), NFR-03 |
 | T-22 | FR-12-AC2, AC6, AC7, FR-02, FR-06, FR-07, FR-08 |
 | T-23 | FR-12-AC1, AC9, FR-01 |
-| T-24 | FR-12-AC3–AC5, AC8, AC10–AC14, FR-03–FR-05, FR-04, FR-09, NFR-03 |
-| T-25 | NFR-03, NFR-05 |
-| T-26 | NFR-02 |
-| T-27 | NFR-04 |
-| T-28 | NFR-01-AC2, all assignment criteria, NFR-07 |
+| T-24 | FR-12-AC3, AC4, AC9, AC10, AC13, FR-03, FR-04, NFR-03 |
+| T-25 | FR-12-AC8, AC11, AC12, AC14, FR-09, NFR-03 |
+| T-26 | FR-12-AC5, AC14, FR-05, FR-03-AC2, NFR-03 |
+| T-27 | NFR-03, NFR-05 |
+| T-28 | NFR-02 |
+| T-29 | NFR-04 |
+| T-30 | NFR-01-AC2, all assignment criteria, NFR-07 |
 
 ### FR/NFR → tasks (every ID covered)
 
@@ -341,45 +362,60 @@
 | CRR-01–CRR-04 | T-11, T-12–T-16, T-18 |
 | FR-01 | T-05, T-12, T-19, T-23 |
 | FR-02 | T-08, T-13, T-22 |
-| FR-03 | T-08, T-12, T-19, T-24 |
+| FR-03 | T-08, T-12, T-19, T-24, T-26 |
 | FR-04 | T-09, T-14, T-18, T-19, T-24 |
-| FR-05 | T-16, T-19, T-24 |
+| FR-05 | T-16, T-19, T-26 |
 | FR-06 | T-08, T-13, T-22 |
 | FR-07 | T-08, T-13, T-22 |
 | FR-08 | T-08, T-13, T-22 |
-| FR-09 | T-04, T-15, T-17, T-19, T-24 |
-| FR-10 | T-04, T-14, T-15, T-16, T-24 |
+| FR-09 | T-04, T-15, T-17, T-19, T-25 |
+| FR-10 | T-04, T-14, T-15, T-16, T-25 |
 | FR-11 | T-07, T-14, T-15, T-18 |
-| FR-12 | T-21–T-25, T-28 |
-| NFR-01 | T-02, T-03, T-28 |
-| NFR-02 | T-10, T-11, T-12–T-16, T-26 |
-| NFR-03 | T-21, T-24, T-25 |
-| NFR-04 | T-02, T-27 |
-| NFR-05 | T-01, T-04, T-25, all test tasks |
+| FR-12 | T-21–T-27, T-30 |
+| NFR-01 | T-02, T-03, T-30 |
+| NFR-02 | T-10, T-11, T-12–T-16, T-28 |
+| NFR-03 | T-21, T-24–T-27 |
+| NFR-04 | T-02, T-29 |
+| NFR-05 | T-01, T-04, T-20, T-27, all test tasks |
 | NFR-06 | T-13 |
-| NFR-07 | T-04, T-17, T-28 |
+| NFR-07 | T-04, T-17, T-30 |
 
 ### Assignment core acceptance criteria (15) → tasks
 
 | # | Criterion | Task(s) |
 |---|-----------|---------|
-| 1 | Ticket can be created from UI | T-23, T-28 |
-| 2 | Tickets can be listed | T-13, T-22, T-28 |
-| 3 | Ticket details can be viewed | T-12, T-24, T-28 |
-| 4 | Ticket fields can be updated | T-14, T-24, T-28 |
-| 5 | Assignee can be changed | T-14, T-24, T-28 |
-| 6 | Comments can be added | T-16, T-24, T-28 |
-| 7 | Search works | T-08, T-13, T-22, T-28 |
-| 8 | Status filter works | T-08, T-13, T-22, T-28 |
-| 9 | Valid status transitions work | T-15, T-17, T-24, T-28 |
-| 10 | Invalid status transitions rejected by backend | T-04, T-15, T-17, T-28 |
-| 11 | Data survives application restart | T-02, T-03, T-28 (NFR-01-AC2 manual) |
-| 12 | Backend validation works | T-10, T-11, T-12–T-16, T-28 |
-| 13 | UI shows meaningful errors | T-24, T-25, T-28 |
-| 14 | State-machine integration tests pass | T-17, T-28 |
-| 15 | No secrets are committed | T-02, T-27, T-28 |
+| 1 | Ticket can be created from UI | T-23, T-30 |
+| 2 | Tickets can be listed | T-13, T-22, T-30 |
+| 3 | Ticket details can be viewed | T-12, T-24, T-30 |
+| 4 | Ticket fields can be updated | T-14, T-24, T-30 |
+| 5 | Assignee can be changed | T-14, T-24, T-30 |
+| 6 | Comments can be added | T-16, T-26, T-30 |
+| 7 | Search works | T-08, T-13, T-22, T-30 |
+| 8 | Status filter works | T-08, T-13, T-22, T-30 |
+| 9 | Valid status transitions work | T-15, T-17, T-25, T-30 |
+| 10 | Invalid status transitions rejected by backend | T-04, T-15, T-17, T-30 |
+| 11 | Data survives application restart | T-02, T-03, T-30 (NFR-01-AC2 manual) |
+| 12 | Backend validation works | T-10, T-11, T-12–T-16, T-30 |
+| 13 | UI shows meaningful errors | T-24–T-27, T-30 |
+| 14 | State-machine integration tests pass | T-17, T-30 |
+| 15 | No secrets are committed | T-02, T-29, T-30 |
 
 **Confirmation:** Every FR-01–FR-12, NFR-01–NFR-07, CRR-01–CRR-04, and all **15** assignment core acceptance criteria are covered by at least one task above.
+
+---
+
+## File count notes (~5 files per task)
+
+Tasks whose **Files** lines imply **more than ~5** touched paths in one commit—split during implementation if needed:
+
+| Task | Note |
+|------|------|
+| **T-12** | Controller + service + several DTOs + mapper + WebMvcTest → often **6–8** files; consider splitting DTO/mapper vs controller test in implementation if diff is too large. |
+| **T-21** | API client + router + proxy + MSW handlers + setup → up to **~6**; keep handlers minimal. |
+| **T-07** | Two entities + two repositories → **4**; OK. |
+| **T-24–T-26** | Split from old T-24 to stay within **~5** each (page + feature components + test). |
+
+All other tasks are within the **2–5 file** target as written.
 
 ---
 
@@ -388,3 +424,4 @@
 | Date | Version | Summary |
 |------|---------|---------|
 | 2026-09-30 | 1.0.0 | Initial task breakdown M0–M8 (T-01–T-28) from baselined spec v1.0. |
+| 2026-09-30 | 1.1.0 | Split detail UI into T-24–T-26; renumber T-27–T-30; T-03/T-10/T-11/T-21 scope updates; file-count flags; coverage tables updated. |
