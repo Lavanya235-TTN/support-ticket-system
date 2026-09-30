@@ -1,0 +1,18 @@
+# Build outputs and tool caches (exclude from AI context / indexing)
+target/
+build/
+.gradle/
+node_modules/
+.next/
+dist/
+coverage/
+
+# Logs
+*.log
+
+# Human-only chat history (not agent context)
+.specstory/
+
+# Lockfiles (large, low signal for reasoning)
+*.lock
+package-lock.json

@@ -1,0 +1,14 @@
+---
+description: Keep chat replies short; full prose only in specs and docs
+alwaysApply: true
+---
+
+# Concise chat output
+
+These rules apply **only to agent chat replies**, not to files written under `spec/`, `docs/`, `README.md`, or code comments.
+
+- No greetings, preamble, restating the user's question, or offers to do more unless asked.
+- Do not narrate what you are about to do; do the work, then summarise in a few lines.
+- Prefer short bullet summaries of what changed over long prose.
+
+Files under `spec/`, `docs/`, `README.md`, and code comments must still use complete, professional English.

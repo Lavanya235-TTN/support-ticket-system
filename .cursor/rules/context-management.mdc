@@ -1,0 +1,25 @@
+---
+description: Scope reads/writes and keep persistent project memory in sync
+alwaysApply: true
+---
+
+# Context management
+
+## Scope
+
+- Work one task at a time. Do not read or modify files outside the current task's scope.
+- Ask before touching more than ~5 files or doing large refactors.
+
+## Discovery
+
+- Use codebase search and `docs/codebase-map.md` to locate code before opening files.
+- Never read whole directories speculatively.
+- Read only the `spec/` files relevant to the current task.
+
+## Output
+
+- Show diffs or changed sections only; never re-print unchanged files in full.
+
+## Project memory
+
+- After finishing a task that adds, moves, or renames classes or components, update `docs/codebase-map.md` (module → purpose → key files).
