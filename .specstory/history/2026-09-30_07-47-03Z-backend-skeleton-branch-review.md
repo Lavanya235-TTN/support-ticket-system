@@ -2154,3 +2154,18 @@ sg docker -c 'cd backend && mvn verify'
 (from repo root)
 
 `newgrp docker` only affects that subshell; restarting Cursor is more reliable for everyday `docker compose` / `docker ps`.
+
+---
+
+_**User**_
+
+/log-prompt 
+
+---
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
+
+</details></tool-use>
