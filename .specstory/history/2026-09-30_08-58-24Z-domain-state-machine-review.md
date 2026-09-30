@@ -444,30 +444,49 @@ Deferred: NFR-07 integration matrix → T-17. Run mvn test.
 
 _**Agent (auto-smart)**_
 
+<think><details><summary>Thought Process</summary>
+Adding a test to verify that canTransitionTo matches allowedTargets for all 25 pairs.
+
+Adding a null-check assertion to canTransitionTo with a corresponding test. Removing TicketPriorityTest.valueOf_parsesEachConstant. Running mvn test.
+</details></think>
+
+_**Agent (auto-smart)**_
+
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend/src/main/java/com/supportticket/domain/TicketStatus.java</summary>
 
 </details></tool-use>
 
 _**Agent (auto-smart)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend/src/test/java/com/supportticket/domain/TicketStatusTest.java</summary>
 
 </details></tool-use>
 
 _**Agent (auto-smart)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend/src/test/java/com/supportticket/domain/TicketPriorityTest.java</summary>
 
 </details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+I'll begin by updating TicketStatus.java to add the Objects.requireNonNull check for target status.
+
+A parameterized test will verify that canTransitionTo matches allowedTargets containment across all 25 pairs.
+
+The test will use a dedicated `allStatusPairs` method source instead of reusing the existing transition matrix, avoiding an unused boolean parameter.
+
+A null-target test will verify that `canTransitionTo` throws `NullPointerException` with the expected message. The `valueOf` test in `TicketPriorityTest` will be removed.
+</details></think>
 
 _**Agent (auto-smart)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
 <summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend/src/main/java/com/supportticket/domain/TicketStatus.java</summary>
-Status: **loading**
 
 </details></tool-use>
 
@@ -475,6 +494,225 @@ _**Agent (auto-smart)**_
 
 <tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
 <summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend/src/test/java/com/supportticket/domain/TicketStatusTest.java</summary>
-Status: **loading**
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend/src/main/java/com/supportticket/domain/TicketStatus.java</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend/src/test/java/com/supportticket/domain/TicketStatusTest.java</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend/src/test/java/com/supportticket/domain/TicketPriorityTest.java</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend/src/test/java/com/supportticket/domain/TicketStatusTest.java</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Fixing a mistake in TicketPriorityTest where LOW was accidentally removed from a containsExactly assertion.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend/src/test/java/com/supportticket/domain/TicketPriorityTest.java</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: cd /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend &amp;&amp; mvn -q test</summary>
+```bash
+cd /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend && mvn -q test
+```
+
+```
+[ERROR] Could not create local repository at /root/.m2/repository -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/LocalRepositoryNotAccessibleException
+
+```
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Running Maven tests requires full read-write access to the local .m2 repository.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: cd /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend &amp;&amp; mvn -q test</summary>
+```bash
+cd /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend && mvn -q test
+```
+
+```
+      Did not match:
+         - @ConditionalOnWebApplication did not find reactive or servlet web application classes (OnWebApplicationCondition)
+
+   ErrorMvcAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'jakarta.servlet.Servlet' (OnClassCondition)
+
+   ErrorWebFluxAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.springframework.web.reactive.config.WebFluxConfigurer' (OnClassCondition)
+
+   FlywayAutoConfiguration.FlywayConfiguration#flywayConnectionDetails:
+      Did not match:
+         - @ConditionalOnMissingBean (types: org.springframework.boot.autoconfigure.flyway.FlywayConnectionDetails; SearchStrategy: all) found beans of type 'org.springframework.boot.autoconfigure.flyway.FlywayConnectionDetails' flywayContainerConnectionDetailsForPostgresContainer (OnBeanCondition)
+
+   FlywayAutoConfiguration.FlywayConfiguration#oracleFlywayConfigurationCustomizer:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.flywaydb.database.oracle.OracleConfigurationExtension' (OnClassCondition)
+
+   FlywayAutoConfiguration.FlywayConfiguration#sqlServerFlywayConfigurationCustomizer:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'org.flywaydb.database.sqlserver.SQLServerConfigurationExtension' (OnClassCondition)
+
+   FreeMarkerAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'freemarker.template.Configuration' (OnClassCondition)
+
+   GraphQlAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'graphql.GraphQL' (OnClassCondition)
+
+   GraphQlQueryByExampleAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'graphql.GraphQL' (OnClassCondition)
+
+   GraphQlQuerydslAutoConfiguration:
+      Did not match:
+         - @ConditionalOnClass did not find required class 'com.querydsl.core.
+… (output truncated)
+```
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Reading the end of the output file to find the actual failure.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="unknown" data-tool-name="ripgrep_raw_search"><details>
+<summary>Tool use: **ripgrep_raw_search**</summary>
+
+Parameters:
+
+```json
+{
+  "caseInsensitive": false,
+  "path": "/home/lavanya/.cursor/projects/home-lavanya-Desktop-POC-PROJECT-support-ticket-system/agent-tools/54c3e333-7de8-4979-91d7-e383dc982517.txt",
+  "pattern": "FAILURE|ERROR|Tests run"
+}
+```
+Additional data:
+
+```json
+{
+  "isPruned": true,
+  "outputMode": "content",
+  "path": "/home/lavanya/.cursor/projects/home-lavanya-Desktop-POC-PROJECT-support-ticket-system/agent-tools/54c3e333-7de8-4979-91d7-e383dc982517.txt",
+  "pattern": "FAILURE|ERROR|Tests run",
+  "topFiles": [
+    {
+      "matchCount": 18,
+      "uri": "../../../.cursor/projects/home-lavanya-Desktop-POC-PROJECT-support-ticket-system/agent-tools/54c3e333-7de8-4979-91d7-e383dc982517.txt"
+    }
+  ],
+  "totalFiles": 1,
+  "totalMatches": 18
+}
+```
+Status: **completed**
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+58 tests ran. Only SupportTicketApplicationTest failed, caused by Docker or Testcontainers issues unrelated to these changes.
+
+Running domain tests in isolation to confirm the changes pass.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: cd /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend &amp;&amp; mvn -q test -Dtest=TicketStatusTest,TicketPriorityTest</summary>
+```bash
+cd /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/backend && mvn -q test -Dtest=TicketStatusTest,TicketPriorityTest
+```
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+The full Maven test run failed on Docker due to an environment issue.
+
+Confirmed TicketPriorityTest contains only one test remaining.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+**Changes**
+
+- **`TicketStatus.java`** — `canTransitionTo` calls `Objects.requireNonNull(target, "target status must not be null")` before `contains`.
+- **`TicketStatusTest.java`** — `canTransitionTo_agreesWithAllowedTargets` over all 25 pairs via `allStatusPairs()`; `canTransitionTo_nullTarget_throws`; existing spec matrix tests unchanged.
+- **`TicketPriorityTest.java`** — removed `valueOf_parsesEachConstant`.
+
+**Tests**
+
+- `mvn test -Dtest=TicketStatusTest,TicketPriorityTest` — **pass**
+- `mvn test` — **57/58 pass**; `SupportTicketApplicationTest.contextLoads` fails here (Testcontainers / no Docker in this environment), not from these edits. Run full `mvn test` locally with Docker available to confirm green.
+
+---
+
+_**User**_
+
+/log-prompt 
+
+---
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
 
 </details></tool-use>
