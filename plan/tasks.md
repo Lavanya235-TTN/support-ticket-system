@@ -16,7 +16,7 @@
 
 ### T-01 — Maven Spring Boot project layout
 
-- Status: [ ] todo
+- Status: [x] done
 - Spec refs: `spec/architecture.md` (stack, backend layering); NFR-05
 - Depends on: —
 - Scope: Create `backend/` Maven project (Java 21, Spring Boot 3.x): `pom.xml`, main application class, package skeleton (`controller`, `service`, `repository`, `domain`, `dto`, `mapper`, `exception`, `config`). **Not yet:** endpoints, JPA entities, Flyway SQL.
@@ -25,7 +25,7 @@
 
 ### T-02 — Docker Compose, env config, datasource
 
-- Status: [ ] todo
+- Status: [x] done
 - Spec refs: `spec/architecture.md` (configuration, local topology); NFR-01, NFR-04-AC2; `spec/requirements.md` decision 9
 - Depends on: T-01
 - Scope: Root `docker-compose.yml` (PostgreSQL 16, **named volume**, reads `.env`); `.env.example` placeholders; `application.yml` uses env vars for datasource. **Not yet:** business logic.
