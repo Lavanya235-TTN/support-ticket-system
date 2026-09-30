@@ -4,6 +4,7 @@ Short index for agents: **module → purpose → key files**. Update this when s
 
 | Module | Purpose | Key paths |
 |--------|---------|-----------|
+| `plan/` | Implementation milestones and tasks | `plan/tasks.md` |
 | `backend/` | Spring Boot API and domain (placeholder layout) | `backend/` (app code TBD) |
 | `frontend/` | Web UI (placeholder layout) | `frontend/` (app code TBD) |
 | `spec/` | Requirements and design specs | `spec/requirements.md`, `spec/api-contract.md`, `spec/ui-flow.md`, `spec/test-strategy.md`, `spec/architecture.md`, `spec/data-model.md`, `spec/state-machine.md` |

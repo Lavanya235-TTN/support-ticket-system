@@ -1358,6 +1358,261 @@ _**User**_
 
 _**Agent (auto-smart)**_
 
+<think><details><summary>Thought Process</summary>
+Appending the last prompt to docs/prompt-history.md. The prompt covered reviewing patch set application across spec files.
+
+Reading prompt-history.md to find the next sequential index and format.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/docs/prompt-history.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+The last prompt applied a 16-item review patch set across spec files. Prior commands included /review-spec and /log-prompt.
+
+Entry #8 will capture the review patch set application.
+
+Phase: Specification. The patch set was applied across all seven spec files. It baselined v1.0. Decision 13 reordewed FR and NFR acceptance criteria. No code.r changes were made.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/docs/prompt-history.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+The prompt was logged successfully.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+Appended **#8** to `docs/prompt-history.md` (Specification phase — 16-item review patch, baselined v1.0 across all spec files).
+
+---
+
+_**User**_
+
+Phase: Plan / Tasks. Read all files in spec/ (baselined v1.0). No application code.
+
+1) Create plan/tasks.md with:
+   - A short intro: how tasks are executed (one task per chat, one commit per task, tests
+     must pass before marking done)
+   - Milestones in this order, each broken into small tasks (aim for 2–5 files changed per task):
+     M0 Backend skeleton: Maven Spring Boot 3.x / Java 21 project in backend/, dependencies,
+        application.yml using env vars, docker-compose.yml (PostgreSQL 16, named volume, reads
+        .env), .env.example, Flyway wired, app starts against Compose DB
+     M1 Domain: TicketStatus (allowedTargets, canTransitionTo) and Priority enums, written
+        test-first with the 25-cell parameterized unit test
+     M2 Persistence: Flyway migrations, entities (@Version), repositories, search/filter
+        Specification with literal % and _ escaping; @DataJpaTest + Testcontainers tests
+     M3 Error handling: domain exceptions, @RestControllerAdvice producing the Problem Details
+        types from api-contract.md, Jackson config rejecting unknown properties; tests
+     M4 API endpoints, one task each: create + get detail; list/search/filter/sort/paging;
+        PATCH fields; PATCH status; POST comment — each with @WebMvcTest tests
+     M5 Integration tests: NFR-07 25-cell matrix, optimistic locking conflict, check-order
+        cases, end-to-end happy path
+     M6 Frontend skeleton: Vite + React + TS in frontend/, React Router, TanStack Query,
+        typed API client, Problem Details error parsing, Vite /api proxy
+     M7 Frontend screens: list (search, filter, pagination); create; detail + edit;
+        status actions from allowedTransitions; comments; error display per ui-flow.md;
+        component tests
+     M8 Hardening: compare generated OpenAPI with api-contract.md, README, secrets check,
+        manual acceptance checklist run for all 15 criteria, final /review-code pass
+   - Each task formatted as:
+     ### T-XX — Title
+     - Status: [ ] todo
+     - Spec refs: FR/NFR IDs + spec files/sections to read
+     - Depends on: T-YY
+     - Scope: what to build (and explicitly what NOT to build yet)
+     - Files: expected files created/changed
+     - Done when: concrete checks (tests named, command to run, behaviour to verify)
+   - A final table: Task → FR/NFR coverage, and confirm every FR/NFR and all 15 assignment
+     criteria are covered by at least one task.
+
+2) Create .cursor/commands/implement-task.md — a reusable command that takes a task ID and:
+   a. Reads that task in plan/tasks.md and ONLY the spec sections it references, plus
+      docs/codebase-map.md
+   b. Checks dependencies are done; if not, stops and says so
+   c. Proposes a short implementation plan (files, classes, tests) and WAITS for my approval
+   d. Implements following .cursor/rules; writes/updates tests in the same task
+   e. Runs the relevant build/tests and shows results; fixes failures without weakening tests
+   f. Reports any place where the spec was unclear or had to be interpreted — does not
+      silently change behaviour
+   g. Updates the task's Status to [x] done, updates docs/codebase-map.md, and appends an entry
+      to docs/prompt-history.md
+   h. Suggests a conventional commit message
+
+3) Update docs/codebase-map.md to include plan/.
+
+---
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+I will read all spec files first to ensure full FR/NFR coverage against the baselined v1.0. Then I will draft plan/tasks.md with milestones and tasks, create .cursor/commands/implement-task.md, and update docs/codebase-map.md.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+Reading baselined specs to build tasks with full FR/NFR traceability.
+
+
+
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/spec/requirements.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **7** results in **1** directory</summary>
+
+Directory: **`/home/lavanya/Desktop/POC_PROJECT/support-ticket-system`** (7 files)
+
+| File |
+|------|
+| `spec/data-model.md` |
+| `spec/test-strategy.md` |
+| `spec/ui-flow.md` |
+| `spec/state-machine.md` |
+| `spec/api-contract.md` |
+| `spec/architecture.md` |
+| `spec/requirements.md` |
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/docs/codebase-map.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **4** results in **1** directory</summary>
+
+Directory: **`/home/lavanya/Desktop/POC_PROJECT/support-ticket-system`** (4 files)
+
+| File |
+|------|
+| `.cursor/commands/log-prompt.md` |
+| `.cursor/commands/generate-tests.md` |
+| `.cursor/commands/review-code.md` |
+| `.cursor/commands/review-spec.md` |
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+I will check an existing command file for formatting reference and review the assignment criteria in the requirements traceability section.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/.cursor/commands/review-spec.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/spec/requirements.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Planning the plan/tasks.md file. It will contain numbered tasks from T-01 onward, breaking down milestones into 2–5 file changes each.
+
+M0 will be split into three tasks. T-01 covers Maven POM, main application class, package structure, and .gitignore. T-02 covers application.yml, docker-compose.yml, and .env.example. T-03 wires Flyway into the backend. Actual SQL migrations will be deferred to M2.
+
+T-03 will also add a test profile stub and verify the application starts. M1 domain tasks T-04 and T-05 will define TicketStatus and TicketPriority enums with transition logic and parameterized tests. M2 persistence tasks T-06 through T-08 will add Flyway migrations, JPA entities and repositories, and TicketSpecification search with Testcontainers. M3 error handling is next.
+
+M3 error handling tasks T-09 through T-11 cover domain exceptions, REST controller advice with Problem Details DTOs, and Jackson configuration with path ID validation.
+
+M4 API tasks T-12 through T-16 handle create, detail, list, search, filter, sort, paging, field patching, status patching, and comment creation.
+
+M5 integration tasks T-17 through T-19 cover the NFR-07 matrix, optimistic locking with check-order integration tests, and an end-to-end happy path test.
+
+M6 frontend tasks T-20 and T-21 scaffold a
+</details></think>
+
+_**Agent (auto-smart)**_
+
+Creating `plan/tasks.md`, `implement-task.md`, and updating the codebase map.
+
+
+
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/plan/tasks.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/.cursor/commands/implement-task.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/docs/codebase-map.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Prompt history logging is skipped unless explicitly requested.
+
+A concise summary of the created deliverables will follow.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+**Added**
+
+- **`plan/tasks.md`** — Intro (one task/chat, one commit, tests green); milestones **M0–M8** with **T-01–T-28**; each task has status, spec refs, deps, scope, files, done-when; FR/NFR + **15 assignment criteria** coverage tables.
+- **`.cursor/commands/implement-task.md`** — Workflow a–h (context, deps, plan+approve, implement, verify, ambiguities, mark done, codebase-map, prompt-history, commit suggestion).
+
+**Updated**
+
+- **`docs/codebase-map.md`** — `plan/` → `plan/tasks.md`.
+
+Start implementation with **`T-01`** via the implement-task command.
+
+---
+
+_**User**_
+
+/log-prompt 
+
+---
+
+_**Agent (auto-smart)**_
+
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
 <summary>Tool use: **read_file_v2** • Read file: </summary>
 
