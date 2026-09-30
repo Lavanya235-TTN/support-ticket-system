@@ -1,3 +1,13 @@
 spring:
   application:
     name: support-ticket-backend
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/support_ticket}
+    username: ${SPRING_DATASOURCE_USERNAME:support_ticket}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+
+server:
+  port: ${SERVER_PORT:8080}

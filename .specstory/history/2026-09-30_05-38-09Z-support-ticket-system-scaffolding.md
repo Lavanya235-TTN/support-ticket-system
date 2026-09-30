@@ -1101,22 +1101,176 @@ Show the final .cursor/ tree.
 
 _**Agent (auto-smart)**_
 
+<think><details><summary>Thought Process</summary>
+I will create reusable AI instructions for this project. This includes a documentation skill and command files.
+
+I will read the create-skill skill first to understand the required structure for SKILL.md and the .cursor/commands/ directory.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+I'll follow the skill-authoring format, then add the documentation skill, the four commands, and prompt-history entry #3.
+
+_**Agent (auto-smart)**_
+
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: /home/lavanya/.cursor/skills-cursor/create-skill/SKILL.md</summary>
 
 </details></tool-use>
 
 _**Agent (auto-smart)**_
 
 <tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
-<summary>Tool use: **read_file_v2** • Read file: </summary>
+<summary>Tool use: **read_file_v2** • Read file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/docs/prompt-history.md</summary>
 
 </details></tool-use>
 
 _**Agent (auto-smart)**_
 
 <tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
-<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **0** directories</summary>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **3** results in **1** directory</summary>
 
-No results found
+Directory: **`/home/lavanya/Desktop/POC_PROJECT/support-ticket-system`** (3 files)
+
+| File |
+|------|
+| `.cursor/rules/api-standards.mdc` |
+| `.cursor/rules/testing.mdc` |
+| `.cursor/rules/java-springboot.mdc` |
 </details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+I will use the exact wording provided by the user verbatim in SKILL.md.
+
+I will treat the user's bullet points as content requirements rather than exact prose to paste verbatim. I will preserve their wording closely without rewriting into essays. The frontmatter fields are being structured now.
+
+The description field will explain when to use the skill for specs, README, ADRs, API docs, and prompt history. The skill will be configured for ambient auto-invocation, omitting the default disable-model-invocation flag.
+
+I will omit the disable-model-invocation flag so the skill auto-invokes during documentation work. I am also creating four command files under .cursor/commands/: review-spec.md, review-code.md, generate-tests.md, and log-prompt.md.
+
+Cursor commands will be plain markdown files in .cursor/commands/. The filename becomes the slash command. I will keep the prompt text minimal and skip frontmatter unless Cursor requires it.
+
+The SKILL.md body is being drafted with five main sections: spec file structure, Mermaid diagram standards, requirement ID conventions, traceability rules, and keeping documentation in sync.
+
+The skill body now includes README structure, style guidelines, and traceability rules. README sections cover overview, tech stack, prerequisites, run instructions, testing, project structure, and AI workflow. Style requires plain, concise language without marketing tone. Code changes must update the matching spec in the same change. The .gitkeep file in .cursor/skills/ will remain unless it causes confusion.
+
+I will keep the existing .gitkeep files in place. The prompt history entry #3 will be dated 2026-09-30 and record the phase, a one-line summary, and the outcome. I am ready to write the files now.
+
+The log-prompt command will use the current date dynamically instead of a hardcoded value. Generate-tests will list test cases with requirement IDs and wait for approval before writing code. Review commands will explicitly forbid editing files without confirmation. The final .cursor/ directory tree will include the existing .gitkeep files.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+The skill format is set. I’ll add the documentation skill, four slash commands, and prompt-history entry #3.
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/.cursor/skills/documentation/SKILL.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/.cursor/commands/review-spec.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/.cursor/commands/review-code.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/.cursor/commands/generate-tests.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/.cursor/commands/log-prompt.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2"><details>
+<summary>Tool use: **edit_file_v2** • Edit file: /home/lavanya/Desktop/POC_PROJECT/support-ticket-system/docs/prompt-history.md</summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+I will list the .cursor directory tree with find.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: find .cursor -print | sort | sed &#39;s|^\.cursor|.cursor|&#39;</summary>
+```bash
+find .cursor -print | sort | sed 's|^\.cursor|.cursor|'
+```
+
+```
+.cursor
+.cursor/commands
+.cursor/commands/generate-tests.md
+.cursor/commands/.gitkeep
+.cursor/commands/log-prompt.md
+.cursor/commands/review-code.md
+.cursor/commands/review-spec.md
+.cursor/rules
+.cursor/rules/api-standards.mdc
+.cursor/rules/.gitkeep
+.cursor/rules/java-springboot.mdc
+.cursor/rules/testing.mdc
+.cursor/skills
+.cursor/skills/documentation
+.cursor/skills/documentation/SKILL.md
+.cursor/skills/.gitkeep
+
+```
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+The final .cursor/ tree will be presented cleanly. The completed documentation and prompt history will be summarized.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+The documentation skill and four slash commands are in place, and this prompt is logged as entry #3. No application code was added.
+
+```
+.cursor/
+├── commands/
+│   ├── .gitkeep
+│   ├── generate-tests.md
+│   ├── log-prompt.md
+│   ├── review-code.md
+│   └── review-spec.md
+├── rules/
+│   ├── .gitkeep
+│   ├── api-standards.mdc
+│   ├── java-springboot.mdc
+│   └── testing.mdc
+└── skills/
+    ├── .gitkeep
+    └── documentation/
+        └── SKILL.md
+```
+
+`/review-spec` and `/review-code` report findings and wait before editing. `/generate-tests` lists cases with requirement IDs and waits for approval. `/log-prompt` appends the next row to `docs/prompt-history.md`.
+
+`docs/prompt-history.md` now has row 3 for **2026-09-30**, phase **Steering - Skills & Commands**.

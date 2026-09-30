@@ -5,7 +5,8 @@ Short index for agents: **module → purpose → key files**. Update this when s
 | Module | Purpose | Key paths |
 |--------|---------|-----------|
 | `plan/` | Implementation milestones and tasks | `plan/tasks.md` |
-| `backend/` | Spring Boot API and domain (placeholder layout) | `backend/` (app code TBD) |
+| *(root)* | Local PostgreSQL via Compose | `docker-compose.yml`, `.env.example` (copy to git-ignored `.env`) |
+| `backend/` | Spring Boot API (Java 21, Maven) | `backend/pom.xml`, `backend/src/main/java/com/supportticket/SupportTicketApplication.java`, layer packages under `com.supportticket.*`, `backend/src/main/resources/application.yml`, `backend/src/main/resources/db/migration/` (Flyway; SQL in T-06), `backend/src/test/java/com/supportticket/TestcontainersConfiguration.java` (integration tests) |
 | `frontend/` | Web UI (placeholder layout) | `frontend/` (app code TBD) |
 | `spec/` | Requirements and design specs | `spec/requirements.md`, `spec/api-contract.md`, `spec/ui-flow.md`, `spec/test-strategy.md`, `spec/architecture.md`, `spec/data-model.md`, `spec/state-machine.md` |
 | `docs/` | Project docs, prompt history, token/context notes | `docs/prompt-history.md`, `docs/token-optimisation.md`, this file |

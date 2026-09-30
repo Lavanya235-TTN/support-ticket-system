@@ -16,7 +16,7 @@
 
 ### T-01 — Maven Spring Boot project layout
 
-- Status: [ ] todo
+- Status: [x] done
 - Spec refs: `spec/architecture.md` (stack, backend layering); NFR-05
 - Depends on: —
 - Scope: Create `backend/` Maven project (Java 21, Spring Boot 3.x): `pom.xml`, main application class, package skeleton (`controller`, `service`, `repository`, `domain`, `dto`, `mapper`, `exception`, `config`). **Not yet:** endpoints, JPA entities, Flyway SQL.
@@ -25,7 +25,7 @@
 
 ### T-02 — Docker Compose, env config, datasource
 
-- Status: [ ] todo
+- Status: [x] done
 - Spec refs: `spec/architecture.md` (configuration, local topology); NFR-01, NFR-04-AC2; `spec/requirements.md` decision 9
 - Depends on: T-01
 - Scope: Root `docker-compose.yml` (PostgreSQL 16, **named volume**, reads `.env`); `.env.example` placeholders; `application.yml` uses env vars for datasource. **Not yet:** business logic.
@@ -34,7 +34,7 @@
 
 ### T-03 — Flyway wired; app starts against Compose DB
 
-- Status: [ ] todo
+- Status: [x] done
 - Spec refs: `spec/architecture.md` ADR-002; `spec/data-model.md` (migration plan overview); NFR-01
 - Depends on: T-02
 - Scope: Add JPA, PostgreSQL driver, and Flyway; `ddl-auto=none`; empty `backend/src/main/resources/db/migration/` (Flyway runs with **zero** migrations). **Not yet:** V1/V2 SQL (T-06), domain entities.
