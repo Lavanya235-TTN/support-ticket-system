@@ -803,3 +803,320 @@ Each file has `description`, `globs`, and `alwaysApply: false`. They cover Sprin
 _**User**_
 
 git add . && git commit -m "docs: add Cursor rules for Spring Boot, testing, API standars" && git push
+
+---
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Running git add, commit, and push.
+
+Using the exact commit message as provided, including the typo.
+
+Last push failed due to HTTPS credentials. Still attempting the push as requested. Running git status, diff, and log first.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+I'll check the repo state, then stage, commit with your message, and push.
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: git status</summary>
+```bash
+git status
+```
+
+```
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .specstory/history/2026-09-30_05-38-09Z-support-ticket-system-scaffolding.md
+	modified:   docs/prompt-history.md
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	.cursor/rules/api-standards.mdc
+	.cursor/rules/java-springboot.mdc
+	.cursor/rules/testing.mdc
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+```
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: git diff &amp;&amp; git diff --staged</summary>
+```bash
+git diff && git diff --staged
+```
+
+````
+diff --git a/.specstory/history/2026-09-30_05-38-09Z-support-ticket-system-scaffolding.md b/.specstory/history/2026-09-30_05-38-09Z-support-ticket-system-scaffolding.md
+index 0fe2f81..262b129 100644
+--- a/.specstory/history/2026-09-30_05-38-09Z-support-ticket-system-scaffolding.md
++++ b/.specstory/history/2026-09-30_05-38-09Z-support-ticket-system-scaffolding.md
+@@ -376,10 +376,43 @@ git add . && git commit -m "chore: scaffold repository structure and prompt logg
+ 
+ _**Agent (auto-smart)**_
+ 
++<think><details><summary>Thought Process</summary>
++Running git add, commit, and push.
++
++Checking the current branch first. Cloud Agents must use a separate branch and cannot push directly to main.
++</details></think>
++
++_**Agent (auto-smart)**_
++
++I'll check the repo state, then stage, commit with your message, and push.
++
++_**Agent (auto-smart)**_
++
+ <tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+ <summary>Tool use: **run_terminal_command_v2** • Run command: git status</summary>
+ ```bash
+ git status
++```
++
++```
++On branch main
++
++No commits yet
++
++Untracked files:
++  (use "git add <file>..." to include in what will be committed)
++	.cursor/
++	.cursorindexingignore
++	.gitignore
++	.specstory/
++	README.md
++	backend/
++	docs/
++	frontend/
++	spec/
++
++nothing added to commit but untracked files present (use "git add" to track)
++
+ ```
+ </details></tool-use>
+ 
+@@ -399,4 +432,374 @@ _**Agent (auto-smart)**_
+ ```bash
+ git log -8 --oneline --decorate && git branch -vv && git status -sb
+ ```
++
++```
++fatal: your current branch 'main' does not have any commits yet
++
++```
++</details></tool-use>
++
++_**Agent (auto-smart)**_
++
++<think><details><summary>Thought Process</summary>
++Git log failed because no commits exist yet.
++
++Checking `.specstory` for secrets before committing everything. The workspace rule forbids direct main pushes, but the user explicitly requested it.
++
++Proceeding with the push despite the workspace rule. Verifying git remote configurat
+… (output truncated)
+````
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: git log -8 --oneline --decorate &amp;&amp; git status -sb &amp;&amp; git remote -v</summary>
+```bash
+git log -8 --oneline --decorate && git status -sb && git remote -v
+```
+
+```
+de1930d (HEAD -> main, origin/main) chore: scaffold repository structure and prompt logging
+## main...origin/main
+ M .specstory/history/2026-09-30_05-38-09Z-support-ticket-system-scaffolding.md
+ M docs/prompt-history.md
+?? .cursor/rules/api-standards.mdc
+?? .cursor/rules/java-springboot.mdc
+?? .cursor/rules/testing.mdc
+origin	https://github.com/Lavanya235-TTN/support-ticket-system.git (fetch)
+origin	https://github.com/Lavanya235-TTN/support-ticket-system.git (push)
+
+```
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+The user explicitly requested `git add .`.
+
+The commit message will use the exact text provided, including the typo "standars". All files, including .specstory history, will be committed and pushed. The previous HTTPS failure may be resolved since the branch is now up to date.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+The branch is on `main` and matches `origin/main`. I'll commit the rules, prompt log, and specstory history, then push.
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2**</summary>
+Cancelled
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+Auto-review blocked `git add .`.
+
+Retrying the exact shell command with smart mode approval enabled. The user explicitly requested `git add .`, and the rule files already exist.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+The commit was blocked before it ran. You asked for `git add .`, so I’m sending that same command for your approval.
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: git add . &amp;&amp; git commit -m &#34;$(cat &lt;&lt;&#39;EOF&#39;
+docs: add Cursor rules for Spring Boot, testing, API standars
+
+EOF
+)&#34; &amp;&amp; git status</summary>
+```bash
+git add . && git commit -m "$(cat <<'EOF'
+docs: add Cursor rules for Spring Boot, testing, API standars
+
+EOF
+)" && git status
+```
+
+```
+[main 7446071] docs: add Cursor rules for Spring Boot, testing, API standars
+ 5 files changed, 511 insertions(+)
+ create mode 100644 .cursor/rules/api-standards.mdc
+ create mode 100644 .cursor/rules/java-springboot.mdc
+ create mode 100644 .cursor/rules/testing.mdc
+On branch main
+Your branch is ahead of 'origin/main' by 1 commit.
+  (use "git push" to publish your local commits)
+
+nothing to commit, working tree clean
+
+```
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+The commit succeeded. Now pushing the changes.
+
+Last HTTPS push failed. I'll retry with full permissions. The branch is one commit ahead. I'll report any authentication failure.
+</details></think>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_command_v2"><details>
+<summary>Tool use: **run_terminal_command_v2** • Run command: git push</summary>
+```bash
+git push
+```
+
+```
+To https://github.com/Lavanya235-TTN/support-ticket-system.git
+   de1930d..7446071  main -> main
+
+```
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<think><details><summary>Thought Process</summary>
+The push succeeded.
+
+The commit message kept the requested spelling "standars".
+</details></think>
+
+_**Agent (auto-smart)**_
+
+Committed and pushed to `main` as `7446071` with the message `docs: add Cursor rules for Spring Boot, testing, API standars`.
+
+The commit includes the three rule files, the prompt-history update, and the specstory history change. `origin/main` is now at that commit.
+
+---
+
+_**User**_
+
+Create reusable AI instructions for this project. Do NOT write application code.
+
+A) Skill: .cursor/skills/documentation/SKILL.md
+   Frontmatter: name: documentation, description: when to use it (writing/updating specs,
+   README, ADRs, API docs, prompt history).
+   Body should cover:
+   - Spec files live in spec/ and each has: Purpose, Scope, Content, Open Questions, Change Log
+   - Use Mermaid for diagrams (architecture, ER, state machine, sequence/UI flows)
+   - Requirements get IDs (FR-01, NFR-01) and acceptance criteria in Given/When/Then
+   - Traceability: every task and test should reference a requirement ID
+   - Keep docs in sync: if code changes behaviour, update the matching spec in the same change
+   - README structure: overview, tech stack, prerequisites, how to run (backend, frontend, DB),
+     how to test, project structure, AI workflow used
+   - Plain, concise language; no marketing tone
+
+B) Commands in .cursor/commands/ (plain markdown prompts, invokable as /name):
+
+   1. review-spec.md
+      Review the spec/ files for: missing or ambiguous requirements, contradictions between files,
+      requirements without acceptance criteria, gaps vs the state machine rules, untestable statements,
+      missing error cases. Output a table: Severity | File | Issue | Suggested fix. Do not edit files
+      unless I confirm.
+
+   2. review-code.md
+      Review the given files/diff against .cursor/rules and spec/. Check: layering violations,
+      business logic in controllers, state machine enforced only in backend service/domain,
+      validation coverage, error handling matches api-standards, N+1 queries, transaction boundaries,
+      hardcoded secrets, missing tests, deviations from api-contract.md. Output: Severity | Location |
+      Issue | Fix. Do not edit unless I confirm.
+
+   3. generate-tests.md
+      Generate tests for the given class/feature following .cursor/rules/testing.mdc. Start by listing
+      the test cases (with requirement IDs) and wait for my approval before writing code. Include
+      happy path, validation failures, not-found, and for status logic the full transition matrix.
+
+   4. log-prompt.md
+      Append an entry to docs/prompt-history.md with: next sequential #, today's date, phase,
+      a one-line summary of my last prompt, and the outcome (what was produced, what I changed or
+      rejected). Keep the table format intact.
+
+Then append entry #3 to docs/prompt-history.md (Phase: Steering - Skills & Commands).
+Show the final .cursor/ tree.
+
+---
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2"><details>
+<summary>Tool use: **read_file_v2** • Read file: </summary>
+
+</details></tool-use>
+
+_**Agent (auto-smart)**_
+
+<tool-use data-tool-type="search" data-tool-name="glob_file_search"><details>
+<summary>Tool use: **glob_file_search** • Searched codebase "" • **0** results in **0** directories</summary>
+
+No results found
+</details></tool-use>
