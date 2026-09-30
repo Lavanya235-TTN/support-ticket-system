@@ -1,13 +1,16 @@
 package com.supportticket.domain;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit matrix for {@code spec/state-machine.md} (NFR-07, FR-09).
@@ -21,6 +24,19 @@ class TicketStatusTest {
         assertThat(from.canTransitionTo(to)).isEqualTo(allowed);
     }
 
+    @ParameterizedTest(name = "{0} -> {1}")
+    @MethodSource("allStatusPairs")
+    void canTransitionTo_agreesWithAllowedTargets(TicketStatus from, TicketStatus to) {
+        assertThat(from.canTransitionTo(to)).isEqualTo(from.allowedTargets().contains(to));
+    }
+
+    @Test
+    void canTransitionTo_nullTarget_throws() {
+        assertThatThrownBy(() -> TicketStatus.OPEN.canTransitionTo(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("target status must not be null");
+    }
+
     @ParameterizedTest(name = "{0} → {1}")
     @MethodSource("allowedTargetsByStatus")
     void allowedTargets_matchesStateMachineAndIsUnmodifiable(
@@ -28,6 +44,11 @@ class TicketStatusTest {
         Set<TicketStatus> targets = status.allowedTargets();
         assertThat(targets).containsExactlyInAnyOrderElementsOf(expected);
         assertThat(targets).isUnmodifiable();
+    }
+
+    static Stream<Arguments> allStatusPairs() {
+        return Arrays.stream(TicketStatus.values())
+                .flatMap(from -> Arrays.stream(TicketStatus.values()).map(to -> Arguments.of(from, to)));
     }
 
     static Stream<Arguments> allowedTargetsByStatus() {

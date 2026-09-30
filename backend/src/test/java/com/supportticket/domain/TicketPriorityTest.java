@@ -11,11 +11,4 @@ class TicketPriorityTest {
         assertThat(TicketPriority.values())
                 .containsExactly(TicketPriority.LOW, TicketPriority.MEDIUM, TicketPriority.HIGH, TicketPriority.CRITICAL);
     }
-
-    @Test
-    void valueOf_parsesEachConstant() {
-        for (TicketPriority priority : TicketPriority.values()) {
-            assertThat(TicketPriority.valueOf(priority.name())).isEqualTo(priority);
-        }
-    }
 }

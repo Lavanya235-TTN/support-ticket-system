@@ -1,6 +1,7 @@
 package com.supportticket.domain;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public enum TicketStatus {
@@ -18,6 +19,7 @@ public enum TicketStatus {
             CANCELLED, Set.of());
 
     public boolean canTransitionTo(TicketStatus target) {
+        Objects.requireNonNull(target, "target status must not be null");
         return ALLOWED_TARGETS.get(this).contains(target);
     }
 
